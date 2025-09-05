@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -46,8 +46,15 @@ jobs:
 
       - name: Package Extension
         run: |
-          pnpm install -g @vscode/vsce
-          vsce package --no-dependencies
+          # Try installing vsce with specific version to avoid undici issues
+          pnpm install -g @vscode/vsce@3.5.0 || pnpm install -g @vscode/vsce@latest
+          
+          # Package the extension
+          vsce package --no-dependencies --out lockor-${{ inputs.version }}.vsix || {
+            echo "vsce failed, trying alternative approach..."
+            # Fallback: use npx to avoid global install issues
+            npx @vscode/vsce@latest package --no-dependencies --out lockor-${{ inputs.version }}.vsix
+          }
           
           # Verify VSIX was created
           VSIX_FILE=$(ls *.vsix | head -n1)
