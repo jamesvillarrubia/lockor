@@ -70,21 +70,11 @@ export class StatusBarManager implements vscode.Disposable {
             this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
             this.statusBarItem.show();
         } else {
-            // Optionally show unlocked status, or hide completely
+            // Show unlocked status - keep it visible at all times
             this.statusBarItem.text = '🔓';
             this.statusBarItem.tooltip = `File "${fileName}" is unlocked. Click to lock.`;
             this.statusBarItem.backgroundColor = undefined;
-            
-            // Only show for a brief moment, then hide to reduce clutter
             this.statusBarItem.show();
-            
-            // Auto-hide after 2 seconds if file is not locked
-            this.hideTimeout = setTimeout(() => {
-                if (!this.lockorManager.isFileLocked(uri)) {
-                    this.statusBarItem.hide();
-                }
-                this.hideTimeout = undefined;
-            }, 2000);
         }
     }
 
