@@ -83,7 +83,7 @@ jobs:
   # TAGGING (on develop branch with version)
   tag-version:
     needs: [versioning]
-    if: ${{ contains(fromJson('["develop"]'), github.ref_name) && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref == 'refs/heads/develop' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.tag.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
@@ -91,7 +91,7 @@ jobs:
   # PUBLISH TO MARKETPLACE (on main branch with version)
   publish:
     needs: [tag-version, versioning]
-    if: ${{ contains(fromJson('["main"]'), github.ref_name) && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref == 'refs/heads/main' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.publish.yml
     secrets: inherit
     with:
@@ -100,7 +100,7 @@ jobs:
   # CREATE PR (on develop branch)
   create-pr:
     needs: [build-test, code-analyze, versioning, tag-version]
-    if: ${{ contains(fromJson('["develop"]'), github.ref_name) && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.create-pr.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
