@@ -210,7 +210,7 @@ else
 EOF
     
     # Install release-it dependencies
-    npm install --no-save release-it @release-it/conventional-changelog conventional-changelog-angular
+    pnpm install --no-save release-it @release-it/conventional-changelog conventional-changelog-angular
     
     # Get next version
     NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
@@ -237,7 +237,7 @@ log_step "Updating package.json version to $VERSION"
 if [[ "$DRY_RUN" == true ]]; then
   log_info "DRY RUN: Would update package.json version to $VERSION"
 else
-  npm version "$VERSION" --no-git-tag-version
+  pnpm version "$VERSION" --no-git-tag-version
   log_success "Updated package.json version to $VERSION"
 fi
 
