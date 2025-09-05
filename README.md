@@ -1,125 +1,247 @@
 # Lockor 🔒
 
-**Lockor** (cursOR + LOCKer) is a simple VS Code and Cursor extension that prevents certain files from being modified. Perfect for protecting configuration files, templates, or any files you want to keep unchanged during development.
+**Lockor** (cursOR + LOCKer) is a comprehensive VS Code and Cursor extension that prevents AI tools and users from modifying protected files. Perfect for safeguarding configuration files, templates, or any critical files you want to keep unchanged during development.
 
-## Features
+## ✨ Key Features
 
-- 🔒 **Lock/Unlock Files**: Easily lock files to prevent accidental modifications
-- 🚫 **Save Prevention**: Blocks save operations on locked files
-- 📊 **Status Bar Indicator**: Visual indicator showing lock status of current file
-- 🎯 **Context Menu Integration**: Right-click any file to toggle its lock status
-- ⚙️ **Configurable**: Customize notifications and behavior
-- 💾 **Persistent**: Lock states are remembered across VS Code sessions
-- 🤖 **AI Integration**: Automatically updates `.cursor/rules` to inform AI tools
+### 🔒 **File Protection System**
+- **Smart Protection Levels**: Soft, AI-Aware, and Hard modes for different use cases
+- **Lock/Unlock Files**: Easily toggle file protection status
+- **Persistent State**: Lock states remembered across VS Code sessions
+- **Workspace Scoped**: Protection settings per workspace
 
-## Usage
+### 🤖 **AI Integration & Blocking**
+- **Cursor Rules Integration**: Automatically updates `.cursor/rules/lockor.mdc` with protection rules
+- **Mode-Specific AI Instructions**: Different blocking strategies for each protection level
+- **Pre-Check Procedures**: Forces AI to verify file status before any operations
+- **Context Keys**: Exposes lock status to VS Code's context system
 
-### Locking Files
+### 📁 **Multiple AI Visibility Layers**
+- **`.lockor` YAML Status File**: Clean, structured record of all protected files
+- **Language-Aware File Markers**: Optional comment headers in appropriate syntax for each file type
+- **Workspace Diagnostics**: Shows lock warnings in VS Code Problems panel
+- **Status Bar Integration**: Visual indicator of current file's protection status
 
-1. **From Editor**: Open a file and use `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux), then type "Lockor: Lock File"
-2. **From Explorer**: Right-click any file in the explorer and select "Toggle File Lock"
-3. **Quick Toggle**: Use the keyboard shortcut `Cmd+Shift+L` (Mac) or `Ctrl+Shift+L` (Windows/Linux)
+### ⚙️ **Advanced Configuration**
+- **Flexible Protection Levels**: Choose the right level of protection for your needs
+- **Optional Features**: Enable/disable file markers, status files, notifications
+- **Hard Mode Conflict Detection**: Intelligent handling of incompatible feature combinations
+- **Debounced Notifications**: Prevents notification spam during editing
 
-### Commands
+## 🎯 Protection Levels
+
+| Level | AI Instructions | User Experience | Save Blocking | OS Read-Only |
+|-------|----------------|------------------|---------------|--------------|
+| **Soft** | 🟡 Gentle reminders | ⚠️ Warnings only | ❌ No | ❌ No |
+| **AI-Aware** (default) | 🔴 Strict blocking | ⚠️ Warnings only | ❌ No | ❌ No |
+| **Hard** | 🔴 Strict blocking | 🔴 Hard blocked | ✅ Yes | ✅ Yes |
+
+### When to Use Each Level:
+- **🟡 Soft**: Light protection - gentle reminders for everyone, no blocking
+- **🔴 AI-Aware**: AI protection only - humans can save with warnings, AI is strictly blocked *(recommended)*
+- **⚫ Hard**: Maximum protection - everyone is blocked, OS read-only permissions
+
+## 🚀 Usage
+
+### Basic File Locking
+
+1. **From Editor**: Use `Cmd+Shift+P` → "Lockor: Toggle File Lock"
+2. **From Explorer**: Right-click file → "Toggle File Lock"  
+3. **Keyboard Shortcut**: `Cmd+Shift+L` (Mac) or `Ctrl+Shift+L` (Windows/Linux)
+
+### Available Commands
 
 - `Lockor: Lock File` - Lock the currently active file
-- `Lockor: Unlock File` - Unlock the currently active file  
+- `Lockor: Unlock File` - Unlock the currently active file
 - `Lockor: Toggle File Lock` - Toggle lock status of current file
 - `Lockor: Show Locked Files` - View and manage all locked files
 
-### Status Bar
+### Status Bar Indicator
 
-The status bar shows:
-- 🔒 **Locked** - File is protected (red background)
-- 🔓 **Unlocked** - File can be modified (auto-hides after 2 seconds)
+- 🔒 **Gold "LOCKED"** - File is protected (warning background)
+- 🔓 **"UNLOCKED"** - File can be modified (auto-hides after 2 seconds)
 
-## Configuration
+## ⚙️ Configuration
 
-Access settings via `File > Preferences > Settings` and search for "Lockor":
+Access via `File > Preferences > Settings` → search "Lockor":
+
+### Core Settings
 
 ```json
 {
-  "lockor.showStatusBarItem": true,     // Show/hide status bar indicator
-  "lockor.showNotifications": true,     // Show lock/unlock notifications
-  "lockor.protectionLevel": "ai-aware"  // Protection level: "soft", "ai-aware", or "hard"
+  "lockor.protectionLevel": "ai-aware",    // "soft" | "ai-aware" | "hard"
+  "lockor.showStatusBarItem": true,        // Show status bar indicator
+  "lockor.showNotifications": true         // Show lock/unlock notifications
 }
 ```
 
-### Protection Levels Comparison:
+### Advanced Features
 
-| Feature | **Soft** | **AI-Aware** (Default) | **Hard** |
-|---------|----------|-------------------------|----------|
-| **AI Context/Rules** | 🟡 Gentle reminders | 🔴 Strong blocking rules | 🔴 Strong blocking rules |
-| **AI Can Modify** | 🟡 Discouraged | ❌ Blocked | ❌ Blocked |
-| **User Can Edit** | ✅ Yes (with warnings) | ✅ Yes (with warnings) | ❌ No (read-only) |
-| **Save Prevention** | ❌ No | ❌ No | ✅ Yes |
-| **Save Warnings** | ✅ Yes | ✅ Yes | ❌ No (blocked) |
-| **OS Read-Only** | ❌ No | ❌ No | ✅ Yes |
-| **External Tools** | ✅ Can modify | ✅ Can modify | ❌ Blocked |
-| **Use Case** | Light protection | AI protection only | Maximum protection |
+```json
+{
+  "lockor.createStatusFile": true,         // Generate .lockor YAML file
+  "lockor.addVisibleMarkers": false        // Add comment headers to files
+}
+```
 
-#### When to Use Each Level:
-- **Soft**: Light protection - gentle reminders for everyone, no blocking
-- **AI-Aware**: AI protection only - humans can save with warnings, AI is blocked (recommended)
-- **Hard**: Maximum protection - everyone is blocked, OS read-only permissions
+**Note**: `addVisibleMarkers` is automatically disabled in Hard mode due to read-only conflicts.
 
-## AI Integration
+## 🤖 AI Integration Details
 
-Lockor automatically updates `.cursor/rules` with locked file information, so Cursor AI and other AI tools know which files should not be modified.
+### Cursor Rules (`.cursor/rules/lockor.mdc`)
 
-## Installation
+Lockor automatically generates mode-specific rules:
 
-### From VS Code Marketplace
-1. Open VS Code
-2. Go to Extensions (`Ctrl+Shift+X`)
-3. Search for "Lockor"
-4. Click Install
+**Soft Mode Example:**
+```markdown
+---
+description: "NOTICE: These files are marked as \"soft\" protected by Lockor..."
+globs:
+  - "config.js"
+alwaysApply: true
+---
+
+# PROTECTED FILES - PLEASE AVOID EDITING
+
+## RECOMMENDED RESPONSE
+1. **REMIND THE USER**: 'This file is marked as "soft" protected...'
+2. **OFFER OPTIONS**: Suggest 1) unlocking 2) alternative path, or 3) proceed anyway
+3. **RESPECT THEIR CHOICE**: If they confirm, you may proceed
+```
+
+**AI-Aware/Hard Mode Example:**
+```markdown
+---
+description: "CRITICAL: You MUST NOT modify these locked files..."
+---
+
+# LOCKED FILES - DO NOT EDIT
+
+## MANDATORY PRE-CHECK PROCEDURE
+**BEFORE performing ANY file operation, you MUST:**
+1. **CHECK** if the target file matches any locked file pattern
+2. **VERIFY** the file path against the locked files list
+3. **STOP IMMEDIATELY** if the file is locked
+```
+
+### .lockor Status File
+
+```yaml
+# ⚠️  DO NOT EDIT THIS FILE MANUALLY
+# This file is automatically generated by the Lockor VS Code extension
+
+version: "1.0"
+generated: "2024-01-15T10:30:00.000Z"
+protection_level: "ai-aware"
+total_locked_files: 2
+
+locked_files:
+  - path: "src/config.js"
+    absolute: "/full/path/to/src/config.js"
+  - path: ".env"
+    absolute: "/full/path/to/.env"
+
+protection_info:
+  mode: "ai-aware"
+  description: "AI blocked, humans can save with warnings"
+  ai_instructions: "STRICTLY PROHIBITED - Do not modify these files"
+  save_blocking: false
+  os_readonly: false
+```
+
+### Language-Aware File Markers
+
+When `addVisibleMarkers` is enabled, Lockor adds appropriate comment headers:
+
+```javascript
+/* 🔒 LOCKOR: This file is LOCKED and should NOT be modified! */
+// Your JavaScript code...
+```
+
+```python
+# 🔒 LOCKOR: This file is LOCKED and should NOT be modified!
+# Your Python code...
+```
+
+```html
+<!-- 🔒 LOCKOR: This file is LOCKED and should NOT be modified! -->
+<!-- Your HTML content... -->
+```
+
+**Supported Languages**: JavaScript, TypeScript, Python, Shell, HTML, CSS, SQL, MATLAB, LaTeX, Vim, and many more.
+
+## 📦 Installation
+
+### From VS Code Marketplace *(Coming Soon)*
+1. Open VS Code Extensions (`Ctrl+Shift+X`)
+2. Search for "Lockor"
+3. Click Install
 
 ### Manual Installation
-1. Download the `.vsix` file from releases
-2. Open VS Code thank you 
+1. Download the `.vsix` file from [GitHub Releases](https://github.com/jamesvillarrubia/lockor/releases)
+2. Open VS Code
 3. Run `Extensions: Install from VSIX...` from Command Palette
 4. Select the downloaded file
 
-## Development
-
-### Prerequisites
-- Node.js 22+
-- pnpm
-
-### Setup
+### Development Installation
 ```bash
-git clone <repository-url>
+git clone https://github.com/jamesvillarrubia/lockor.git
 cd lockor
 pnpm install
-```
-
-### Build
-```bash
 pnpm run compile
+# Press F5 to launch Extension Development Host
 ```
 
-### Package
-```bash
-pnpm install -g @vscode/vsce
-vsce package
-```
+## 🛠️ How It Works
 
-## How It Works
+### Multi-Layer Protection System
 
-Lockor works by:
-1. **Tracking State**: Maintains a list of locked files in workspace storage
-2. **Intercepting Saves**: Uses VS Code's `onWillSaveTextDocument` event to prevent saves
-3. **Visual Feedback**: Updates status bar and shows notifications
-4. **AI Integration**: Updates `.cursor/rules` to inform AI tools
-5. **Persistence**: Saves lock state between sessions using workspace storage
+1. **State Management**: Tracks locked files in VS Code workspace storage
+2. **Save Interception**: Uses `onWillSaveTextDocument` event to block saves (Hard mode)
+3. **File Permissions**: Sets OS-level read-only permissions (Hard mode only)
+4. **AI Communication**: Multiple channels ensure AI awareness:
+   - Cursor rules with mandatory pre-check procedures
+   - Context keys for VS Code extensions
+   - Workspace diagnostics in Problems panel
+   - Optional YAML status file and file markers
 
-## Limitations
+### Protection Level Behavior
 
-- Locks are workspace-specific (not global across projects)
-- Only prevents saves through VS Code/Cursor (external file modifications still possible in soft/ai-aware modes)
-- Lock state is stored locally (not shared between team members)
+- **Soft**: Warning notifications, gentle AI discouragement
+- **AI-Aware**: Strict AI blocking, human warnings, no save blocking
+- **Hard**: Everyone blocked, OS read-only, save prevention
 
-## License
+### Conflict Resolution
 
-MIT License - see LICENSE file for details
+- **Hard + File Markers**: Shows warning and offers to switch modes or disable markers
+- **Session Tracking**: AI-Aware mode shows edit warnings only once per file per session
+- **Debounced Notifications**: Prevents spam during rapid typing (2-second delay)
+
+## 🚧 Limitations
+
+- **Workspace Scope**: Lock states are per-workspace, not global
+- **External Modifications**: Only VS Code saves are blocked (Soft/AI-Aware modes)
+- **Team Sharing**: Lock states aren't shared between team members
+- **AI Compliance**: Depends on AI tools respecting cursor rules and context
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+Apache 2.0 License - see [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **GitHub**: https://github.com/jamesvillarrubia/lockor
+- **Issues**: https://github.com/jamesvillarrubia/lockor/issues
+- **VS Code Marketplace**: *(Coming Soon)*
+
+---
+
+*Lockor: Protecting your code from unintended changes, one file at a time.* 🔒✨

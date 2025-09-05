@@ -1,8 +1,8 @@
 {
   "name": "lockor",
+  "version": "0.0.0-release-it",
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
-  "version": "0.1.0",
   "publisher": "lockor",
   "engines": {
     "vscode": "^1.74.0"
@@ -132,11 +132,18 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "release": "release-it",
+    "release:minor": "release-it minor",
+    "release:major": "release-it major",
+    "release:patch": "release-it patch"
   },
   "devDependencies": {
     "@types/vscode": "^1.74.0",
     "@types/node": "18.x",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "release-it": "^18.1.2",
+    "@release-it/conventional-changelog": "^10.0.0",
+    "conventional-changelog-angular": "latest"
   }
 }
