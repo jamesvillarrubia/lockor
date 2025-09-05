@@ -209,8 +209,7 @@ else
 }
 EOF
     
-    # Install release-it dependencies
-    pnpm install --no-save release-it @release-it/conventional-changelog conventional-changelog-angular
+    # Release-it dependencies are already in package.json
     
     # Get next version
     NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
