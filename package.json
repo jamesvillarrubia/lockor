@@ -1,0 +1,130 @@
+{
+  "name": "lockor",
+  "displayName": "Lockor",
+  "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
+  "version": "0.1.0",
+  "publisher": "lockor",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "file",
+    "lock",
+    "protect",
+    "read-only",
+    "cursor"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "lockor.lockFile",
+        "title": "Lock File",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.unlockFile",
+        "title": "Unlock File",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.toggleLock",
+        "title": "Toggle File Lock",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.showLockedFiles",
+        "title": "Show Locked Files",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.isFileLocked",
+        "title": "Check if File is Locked (API)",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.getLockedFiles",
+        "title": "Get All Locked Files (API)",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.getLockStatusInfo",
+        "title": "Get Lock Status Info (API)",
+        "category": "Lockor"
+      },
+      {
+        "command": "lockor.debugAIContext",
+        "title": "Debug AI Context (for testing)",
+        "category": "Lockor"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "lockor.toggleLock",
+          "group": "7_modification",
+          "when": "!explorerResourceIsFolder"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "lockor.toggleLock",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "lockor.toggleLock",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Lockor",
+      "properties": {
+        "lockor.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show lock status in status bar"
+        },
+        "lockor.showNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications when attempting to modify locked files"
+        },
+        "lockor.protectionLevel": {
+          "type": "string",
+          "enum": ["soft", "ai-aware", "hard"],
+          "enumDescriptions": [
+            "Soft: AI gets 'do not modify' signals, but saves are allowed (warnings only)",
+            "AI-Aware: Strong AI signals + blocks saves until unlocked (recommended for AI protection)",
+            "Hard: OS-level read-only file permissions + blocks saves (maximum protection)"
+          ],
+          "default": "ai-aware",
+          "description": "Choose protection level for locked files",
+          "markdownDescription": "**Protection levels:**\n- **Soft**: AI gets context signals, saves allowed with warnings\n- **AI-Aware**: Strong AI signals + save blocking (best for AI protection)\n- **Hard**: OS read-only + save blocking (maximum protection)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "18.x",
+    "typescript": "^5.0.0"
+  }
+}

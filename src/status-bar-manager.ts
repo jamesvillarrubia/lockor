@@ -1,0 +1,96 @@
+/**
+ * StatusBarManager - Manages status bar display for locked files
+ * 
+ * Shows a lock icon in the status bar when the current file is locked,
+ * and provides quick access to toggle the lock state.
+ */
+
+import * as vscode from 'vscode';
+import * as path from 'path';
+import { LockorManager } from './lockor-manager';
+
+export class StatusBarManager implements vscode.Disposable {
+    private statusBarItem: vscode.StatusBarItem;
+
+    constructor(private lockorManager: LockorManager) {
+        // Create status bar item
+        this.statusBarItem = vscode.window.createStatusBarItem(
+            vscode.StatusBarAlignment.Right,
+            100 // Priority - higher numbers appear more to the left
+        );
+
+        this.statusBarItem.command = 'lockor.toggleLock';
+        this.updateVisibility();
+    }
+
+    /**
+     * Update status bar visibility based on configuration
+     */
+    public updateVisibility(): void {
+        const config = vscode.workspace.getConfiguration('lockor');
+        const showStatusBarItem = config.get<boolean>('showStatusBarItem', true);
+
+        if (showStatusBarItem) {
+            this.updateStatusBar(vscode.window.activeTextEditor?.document.uri);
+        } else {
+            this.statusBarItem.hide();
+        }
+    }
+
+    /**
+     * Update status bar content based on current file
+     */
+    public updateStatusBar(uri?: vscode.Uri): void {
+        const config = vscode.workspace.getConfiguration('lockor');
+        const showStatusBarItem = config.get<boolean>('showStatusBarItem', true);
+
+        if (!showStatusBarItem) {
+            this.statusBarItem.hide();
+            return;
+        }
+
+        if (!uri) {
+            this.statusBarItem.hide();
+            return;
+        }
+
+        const isLocked = this.lockorManager.isFileLocked(uri);
+        const fileName = path.basename(uri.fsPath);
+
+        if (isLocked) {
+            this.statusBarItem.text = '🔒 Locked';
+            this.statusBarItem.tooltip = `File "${fileName}" is locked. Click to unlock.`;
+            this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+            this.statusBarItem.show();
+        } else {
+            // Optionally show unlocked status, or hide completely
+            this.statusBarItem.text = '🔓';
+            this.statusBarItem.tooltip = `File "${fileName}" is unlocked. Click to lock.`;
+            this.statusBarItem.backgroundColor = undefined;
+            
+            // Only show for a brief moment, then hide to reduce clutter
+            this.statusBarItem.show();
+            
+            // Auto-hide after 2 seconds if file is not locked
+            setTimeout(() => {
+                if (!this.lockorManager.isFileLocked(uri)) {
+                    this.statusBarItem.hide();
+                }
+            }, 2000);
+        }
+    }
+
+    /**
+     * Force show status bar (useful after lock state changes)
+     */
+    public show(): void {
+        this.updateStatusBar(vscode.window.activeTextEditor?.document.uri);
+    }
+
+    /**
+     * Clean up resources
+     */
+    public dispose(): void {
+        this.statusBarItem.dispose();
+    }
+}
