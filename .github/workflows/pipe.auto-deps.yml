@@ -1,0 +1,12 @@
+name: Auto Dependencies Pipeline
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  auto-dependencies:
+    uses: ./.github/workflows/job.auto-deps.yml
+    secrets: inherit

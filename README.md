@@ -172,10 +172,14 @@ When `addVisibleMarkers` is enabled, Lockor adds appropriate comment headers:
 
 ## 📦 Installation
 
-### From VS Code Marketplace *(Coming Soon)*
+### From Open VSX Registry *(Coming Soon)*
 1. Open VS Code Extensions (`Ctrl+Shift+X`)
 2. Search for "Lockor"
 3. Click Install
+
+**Alternative Sources:**
+- **Open VSX**: https://open-vsx.org/extension/lockor/lockor
+- **VS Code Marketplace**: *(Coming Soon)*
 
 ### Manual Installation
 1. Download the `.vsix` file from [GitHub Releases](https://github.com/jamesvillarrubia/lockor/releases)

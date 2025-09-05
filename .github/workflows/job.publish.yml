@@ -1,0 +1,101 @@
+name: "Publish Extension"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    name: Publish to Open VSX & GitHub Release
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update version in package.json
+        run: |
+          # Temporarily update package.json version for publishing
+          npm version ${{ inputs.version }} --no-git-tag-version
+          echo "Updated package.json version to ${{ inputs.version }}"
+
+      - name: Compile TypeScript
+        run: pnpm run compile
+
+      - name: Package Extension
+        run: |
+          pnpm install -g @vscode/vsce
+          vsce package --no-dependencies
+          
+          # Verify VSIX was created
+          VSIX_FILE=$(ls *.vsix | head -n1)
+          if [ ! -f "$VSIX_FILE" ]; then
+            echo "Error: VSIX file not created"
+            exit 1
+          fi
+          echo "VSIX_FILE=$VSIX_FILE" >> $GITHUB_ENV
+
+      - name: Install ovsx CLI
+        run: pnpm install -g ovsx
+
+      - name: Publish to Open VSX Registry
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          if [ -z "$OVSX_PAT" ]; then
+            echo "Warning: OVSX_PAT not set. Skipping Open VSX publish."
+            echo "To publish to Open VSX Registry, set OVSX_PAT secret with your Personal Access Token"
+            echo "Create token at: https://open-vsx.org/-/user-settings/tokens"
+          else
+            echo "Publishing to Open VSX Registry..."
+            ovsx publish ${{ env.VSIX_FILE }} --pat $OVSX_PAT
+            echo "Successfully published version ${{ inputs.version }} to Open VSX Registry!"
+          fi
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-vsix-${{ inputs.version }}
+          path: ${{ env.VSIX_FILE }}
+          retention-days: 90
+
+      - name: Attach VSIX to GitHub Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if release exists for this version
+          RELEASE_TAG="v${{ inputs.version }}"
+          
+          # Get release ID if it exists
+          RELEASE_ID=$(gh release view $RELEASE_TAG --json id --jq .id 2>/dev/null || echo "")
+          
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Attaching VSIX to GitHub release $RELEASE_TAG..."
+            gh release upload $RELEASE_TAG ${{ env.VSIX_FILE }} --clobber
+            echo "Successfully attached ${{ env.VSIX_FILE }} to GitHub release!"
+          else
+            echo "No GitHub release found for $RELEASE_TAG. VSIX available as artifact."
+          fi

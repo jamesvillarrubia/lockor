@@ -1,0 +1,70 @@
+name: "Auto Dependencies"
+
+on:
+  workflow_call:
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Update dependencies
+        run: |
+          # Update all dependencies to latest versions
+          pnpm update --latest
+          
+          # Check if there are changes
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Dependencies updated"
+            echo "has_updates=true" >> $GITHUB_ENV
+          else
+            echo "No dependency updates needed"
+            echo "has_updates=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create Pull Request
+        if: env.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update dependencies to latest versions'
+          title: 'chore(deps): update dependencies to latest versions'
+          body: |
+            ## Automated Dependency Updates
+            
+            This PR updates dependencies to their latest versions.
+            
+            ### Changes
+            - Updated package dependencies via `pnpm update --latest`
+            
+            ### Testing
+            Please verify that:
+            - [ ] Extension compiles successfully
+            - [ ] All tests pass
+            - [ ] Extension functions correctly in development host
+            
+            **This is an automated pull request created by the Auto Dependencies workflow.**
+          branch: chore/auto-dependency-updates
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
