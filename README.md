@@ -77,7 +77,7 @@ Lockor automatically updates `.cursor/rules` with locked file information, so Cu
 
 ### Manual Installation
 1. Download the `.vsix` file from releases
-2. Open VS Code
+2. Open VS Code thank you 
 3. Run `Extensions: Install from VSIX...` from Command Palette
 4. Select the downloaded file
 

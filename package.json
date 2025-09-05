@@ -117,6 +117,12 @@
           "default": false,
           "description": "Add visible lock comments to the top of locked files (aggressive AI warning)",
           "markdownDescription": "**Warning:** This modifies your files by adding lock comments. Only enable if you want maximum AI visibility."
+        },
+        "lockor.createStatusFile": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create .lockor status file in workspace root",
+          "markdownDescription": "Creates a `.lockor` YAML file in the workspace root listing all locked files. This provides a clear record of protected files that AI tools and developers can reference."
         }
       }
     }
