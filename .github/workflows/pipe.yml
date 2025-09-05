@@ -74,33 +74,33 @@ jobs:
           name: extension-vsix
           path: "*.vsix"
 
-  # VERSIONING (configurable branches)
+  # VERSIONING (on develop and main branches)
   versioning:
     needs: [build-test, code-analyze]
-    if: ${{ (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
+    if: ${{ contains(fromJson('["develop", "main"]'), github.ref_name) && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
     uses: ./.github/workflows/job.version.yml
 
-  # TAGGING (configurable branches with version)
+  # TAGGING (on develop branch with version)
   tag-version:
     needs: [versioning]
-    if: ${{ needs.versioning.outputs.version != '' }}
+    if: ${{ contains(fromJson('["develop"]'), github.ref_name) && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.tag.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
 
-  # PUBLISH TO MARKETPLACE (configurable branches with version)
+  # PUBLISH TO MARKETPLACE (on main branch with version)
   publish:
     needs: [tag-version, versioning]
-    if: ${{ needs.versioning.outputs.version != '' }}
+    if: ${{ contains(fromJson('["main"]'), github.ref_name) && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.publish.yml
     secrets: inherit
     with:
       version: ${{ needs.versioning.outputs.version }}
 
-  # CREATE PR (configurable branches)
+  # CREATE PR (on develop branch)
   create-pr:
     needs: [build-test, code-analyze, versioning, tag-version]
-    if: ${{ needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
+    if: ${{ contains(fromJson('["develop"]'), github.ref_name) && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.create-pr.yml
     with:
       version: ${{ needs.versioning.outputs.version }}

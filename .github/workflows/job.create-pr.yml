@@ -12,46 +12,28 @@ on:
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    # Use branch flow configuration to determine if branch should create PRs
-    if: ${{ true }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Ensures full history for version tracking
-          
-      - name: Check if branch should create PRs
-        id: check_pr_creation
-        run: |
-          CURRENT_BRANCH="${{ github.ref_name }}"
-          SHOULD_CREATE_PR=$(.github/scripts/branch-flow.sh has-role "$CURRENT_BRANCH" creates_pr)
-          
-          if [ "$SHOULD_CREATE_PR" = "true" ]; then
-            echo "Branch $CURRENT_BRANCH should create PRs"
-            echo "should_create=true" >> $GITHUB_OUTPUT
-          else
-            echo "Branch $CURRENT_BRANCH should not create PRs"
-            echo "should_create=false" >> $GITHUB_OUTPUT
-            exit 0  # Exit successfully but skip PR creation
-          fi
 
       - name: Set Up Git
-        if: ${{ steps.check_pr_creation.outputs.should_create == 'true' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Determine Base and Target Version
-        if: ${{ steps.check_pr_creation.outputs.should_create == 'true' }}
         id: versioning
         run: |
           set -x
-          # Use branch flow configuration to determine next branch
+          # Simple 2-branch flow: develop → main
           CURRENT_BRANCH="${{ github.ref_name }}"
-          BASE_BRANCH=$(.github/scripts/branch-flow.sh next "$CURRENT_BRANCH")
           
-          if [ -z "$BASE_BRANCH" ]; then
-            echo "Error: No next branch found for $CURRENT_BRANCH (likely at end of flow)"
+          if [ "$CURRENT_BRANCH" = "develop" ]; then
+            BASE_BRANCH="main"
+          else
+            echo "Error: Unsupported branch for PR creation: $CURRENT_BRANCH"
             exit 1
           fi
           
