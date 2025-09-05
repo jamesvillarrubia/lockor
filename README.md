@@ -47,7 +47,7 @@
 
 1. **From Editor**: Use `Cmd+Shift+P` → "Lockor: Toggle File Lock"
 2. **From Explorer**: Right-click file → "Toggle File Lock"  
-3. **Keyboard Shortcut**: `Cmd+Shift+L` (Mac) or `Ctrl+Shift+L` (Windows/Linux)
+3. **Keyboard Shortcut**: `Cmd+Option+L` (Mac) or `Ctrl+Alt+L` (Windows/Linux)
 
 ### Available Commands
 
