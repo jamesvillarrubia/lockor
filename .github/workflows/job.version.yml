@@ -63,12 +63,20 @@ jobs:
             echo "version=$TAG" >> $GITHUB_OUTPUT
           fi
   
-      - name: Set up minimal package.json
+      - name: Set up package.json with correct version
         run: |
-          echo '{
-            "name": "temporary-lib",
-            "version": "0.0.0-release-it"
-          }' > package.json
+          # Get the current git tag version
+          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          CURRENT_VERSION=${CURRENT_TAG#v}  # Remove 'v' prefix
+          
+          echo "Current git tag: $CURRENT_TAG"
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Create package.json with the correct version from git tag
+          echo "{
+            \"name\": \"temporary-lib\",
+            \"version\": \"$CURRENT_VERSION\"
+          }" > package.json
 
       - name: Install dependencies
         run: npm install release-it @release-it/conventional-changelog conventional-changelog-angular

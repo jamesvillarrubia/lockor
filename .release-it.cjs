@@ -1,11 +1,9 @@
 module.exports = {
   "git": {
     "requireCleanWorkingDir": false,
-    "commit": true,
-    "commitMessage": "chore: release v${version}",
-    "tag": true,
-    "push": true,
-    "pushArgs": ["--follow-tags"],
+    "commit": false,
+    "tag": false,
+    "push": false,
     "tagMatch": "v[0-9]*.[0-9]*.[0-9]*"
   },
   "github": {
@@ -32,13 +30,13 @@ module.exports = {
         let defaults = {
           test: 'ignore',
           build: 'ignore',
-          ci: 'patch',
-          docs: 'patch', 
+          ci: 'ignore',
+          docs: 'ignore', 
           chore: 'patch',
           style: 'patch',
           fix: 'patch',
           perf: 'patch',
-          refactor: 'patch',
+          refactor: 'ignore',
           feat: 'minor',
           major: 'major',
         }
@@ -63,6 +61,7 @@ module.exports = {
           if (commit.type === 'feat') {
             features += 1;
           }
+          console.log("level", level)
           return level
         }))
 
@@ -71,17 +70,13 @@ module.exports = {
           level = 0; // major
         }
 
+        console.log("Final level:", level, "breakings:", breakings, "features:", features)
+
         return {
           level: level,
           reason: breakings === 1
             ? `There is ${breakings} BREAKING CHANGE and ${features} features`
-            : breakings > 1
-            ? `There are ${breakings} BREAKING CHANGES and ${features} features`
-            : features === 1
-            ? `There is ${features} feature`
-            : features > 1 
-            ? `There are ${features} features`
-            : 'Patch release'
+            : `There are ${breakings} BREAKING CHANGES and ${features} features`
         }
       }
     }
