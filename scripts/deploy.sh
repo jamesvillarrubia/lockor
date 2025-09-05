@@ -149,8 +149,18 @@ fi
 
 # Check OVSX_PAT
 if [[ -z "${OVSX_PAT:-}" ]]; then
-  # Try to load from config file
-  if [[ -f ".github/config/github-config.yml" ]]; then
+  # Try to load from .ovsx file first
+  if [[ -f ".ovsx" ]]; then
+    log_info "Loading OVSX_PAT from .ovsx file"
+    OVSX_PAT=$(cat .ovsx | tr -d '\n\r' | xargs)
+    if [[ -n "$OVSX_PAT" ]]; then
+      export OVSX_PAT
+      log_success "OVSX_PAT loaded from .ovsx file"
+    fi
+  fi
+  
+  # Try to load from config file if .ovsx not available
+  if [[ -z "${OVSX_PAT:-}" && -f ".github/config/github-config.yml" ]]; then
     log_info "Loading OVSX_PAT from .github/config/github-config.yml"
     OVSX_PAT=$(grep -A 1 "OVSX_PAT:" .github/config/github-config.yml | grep "value:" | sed 's/.*value: "\(.*\)"/\1/')
     if [[ -n "$OVSX_PAT" ]]; then
@@ -162,7 +172,7 @@ if [[ -z "${OVSX_PAT:-}" ]]; then
   if [[ -z "${OVSX_PAT:-}" ]]; then
     log_error "OVSX_PAT environment variable is required"
     log_info "Set it with: export OVSX_PAT='your_token_here'"
-    log_info "Or add it to .github/config/github-config.yml"
+    log_info "Or add it to .ovsx file or .github/config/github-config.yml"
     exit 1
   fi
 fi
@@ -281,11 +291,20 @@ VSIX_FILE="lockor-$VERSION.vsix"
 if [[ "$DRY_RUN" == true ]]; then
   log_info "DRY RUN: Would create VSIX file: $VSIX_FILE"
 else
-  # Try to package with vsce using the determined version
-  if ! vsce package --no-dependencies --out "$VSIX_FILE" --version "$VERSION"; then
+  # Temporarily update package.json version for packaging
+  log_info "Temporarily updating package.json version to $VERSION for packaging"
+  cp package.json package.json.backup
+  sed -i.tmp "s/\"version\": \"0.0.0-releaseit\"/\"version\": \"$VERSION\"/" package.json
+  rm -f package.json.tmp
+  
+  # Try to package with vsce
+  if ! vsce package --no-dependencies --out "$VSIX_FILE"; then
     log_warning "vsce failed, trying with npx..."
-    npx @vscode/vsce@latest package --no-dependencies --out "$VSIX_FILE" --version "$VERSION"
+    npx @vscode/vsce@latest package --no-dependencies --out "$VSIX_FILE"
   fi
+  
+  # Restore original package.json
+  mv package.json.backup package.json
   
   if [[ ! -f "$VSIX_FILE" ]]; then
     log_error "VSIX file not created: $VSIX_FILE"
@@ -339,14 +358,9 @@ if [[ "$DRY_RUN" == false && "$SKIP_PUBLISH" == false ]]; then
     git tag "$TAG_NAME"
     log_success "Created git tag: $TAG_NAME"
     
-    read -p "Push tag to remote? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      git push origin "$TAG_NAME"
-      log_success "Pushed tag to remote"
-    else
-      log_warning "Tag not pushed to remote - this may affect future release-it runs"
-    fi
+    log_info "Pushing tag to remote..."
+    git push origin "$TAG_NAME"
+    log_success "Pushed tag to remote"
   fi
 fi
 
