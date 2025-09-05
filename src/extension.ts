@@ -225,9 +225,29 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         // Listen for configuration changes
-        vscode.workspace.onDidChangeConfiguration((event) => {
+        vscode.workspace.onDidChangeConfiguration(async (event) => {
             if (event.affectsConfiguration('lockor')) {
                 statusBarManager.updateVisibility();
+                
+                // If protection level changed, update all file permissions
+                if (event.affectsConfiguration('lockor.protectionLevel')) {
+                    console.log('Lockor: Protection level changed, updating file permissions...');
+                    await lockorManager.updateAllFilePermissions();
+                    
+                    // Show notification about the change
+                    const config = vscode.workspace.getConfiguration('lockor');
+                    const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+                    const showNotifications = config.get<boolean>('showNotifications', true);
+                    
+                    if (showNotifications) {
+                        const lockedCount = lockorManager.getLockedFiles().length;
+                        if (lockedCount > 0) {
+                            vscode.window.showInformationMessage(
+                                `🔄 Protection level changed to "${protectionLevel}". Updated ${lockedCount} locked files.`
+                            );
+                        }
+                    }
+                }
             }
         })
     ];

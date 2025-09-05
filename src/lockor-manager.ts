@@ -378,6 +378,38 @@ export class LockorManager {
     }
 
     /**
+     * Update file permissions for all locked files based on current protection level
+     */
+    public async updateAllFilePermissions(): Promise<void> {
+        const config = vscode.workspace.getConfiguration('lockor');
+        const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+        
+        console.log(`Lockor: Updating file permissions for ${this.lockedFiles.size} files to ${protectionLevel} mode`);
+        
+        for (const filePath of this.lockedFiles) {
+            try {
+                if (protectionLevel === 'hard') {
+                    // Apply read-only
+                    await this.setFileReadOnly(filePath, true);
+                    console.log(`Lockor: Set read-only (hard mode): ${filePath}`);
+                } else {
+                    // Remove read-only (soft/ai-aware modes)
+                    await this.setFileReadOnly(filePath, false);
+                    console.log(`Lockor: Removed read-only (${protectionLevel} mode): ${filePath}`);
+                }
+            } catch (error) {
+                console.warn(`Lockor: Could not update permissions for ${filePath}:`, error);
+            }
+        }
+        
+        // Also update all AI visibility methods since protection level changed
+        await this.updateCursorRules();
+        await this.updateWorkspaceDiagnostics();
+        await this.updateFileLockMarkers();
+        await this.updateWorkspaceStatus();
+    }
+
+    /**
      * Create/update prominent workspace status file for AI visibility
      */
     private async updateWorkspaceStatus(): Promise<void> {
