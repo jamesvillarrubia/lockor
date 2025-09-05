@@ -1,6 +1,6 @@
 {
   "name": "lockor",
-  "version": "0.0.0-release-it",
+  "version": "0.1.3",
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",
@@ -86,8 +86,8 @@
     "keybindings": [
       {
         "command": "lockor.toggleLock",
-        "key": "ctrl+shift+l",
-        "mac": "cmd+shift+l",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
         "when": "editorTextFocus"
       }
     ],
@@ -106,7 +106,11 @@
         },
         "lockor.protectionLevel": {
           "type": "string",
-          "enum": ["soft", "ai-aware", "hard"],
+          "enum": [
+            "soft",
+            "ai-aware",
+            "hard"
+          ],
           "enumDescriptions": [
             "Soft: Gentle warnings for everyone, no save blocking, gentle AI discouragement",
             "AI-Aware: Human can save with warnings, AI strictly blocked (recommended)",
@@ -149,12 +153,13 @@
     "config:list": "./.github/config/sync-github-config.sh list"
   },
   "devDependencies": {
-    "@types/vscode": "^1.74.0",
-    "@types/node": "18.x",
-    "typescript": "^5.0.0",
-    "release-it": "^18.1.2",
     "@release-it/conventional-changelog": "^10.0.0",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.74.0",
+    "@vscode/vsce": "^3.6.0",
     "conventional-changelog-angular": "latest",
-    "ovsx": "^0.10.5"
+    "ovsx": "^0.10.5",
+    "release-it": "^18.1.2",
+    "typescript": "^5.0.0"
   }
 }
