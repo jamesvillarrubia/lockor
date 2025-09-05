@@ -4,7 +4,6 @@
 This directory contains all the files needed to set up the CI/CD pipeline in a new repository.
 
 
-
 ## Quick Setup
 
 1. **Copy workflow files**:
@@ -31,6 +30,7 @@ This directory contains all the files needed to set up the CI/CD pipeline in a n
 
 4. **Customize for your project**:
    - Update `package.json` name and scripts
+   - **IMPORTANT**: Keep `"version": "0.0.0-release-it"` as placeholder - CICD will replace this dynamically
    - Modify `job.changes.yml` path filters
    - Update application-specific workflow files
    - Set up repository variables and secrets in GitHub
@@ -40,6 +40,8 @@ This directory contains all the files needed to set up the CI/CD pipeline in a n
    git tag v0.1.0
    git push origin v0.1.0
    ```
+   
+   **Note**: The package.json version stays as `0.0.0-release-it` - this is a placeholder that the release-it system will replace with the actual version during releases.
 
 ## File Descriptions
 
@@ -48,6 +50,25 @@ This directory contains all the files needed to set up the CI/CD pipeline in a n
 - **`eslint.config.js.template`**: ESLint configuration
 - **`.releaserc.json.template`**: Optional release-it configuration
 - **`.gitignore.additions`**: Additional gitignore patterns
+
+## Versioning System
+
+This template uses a dynamic versioning system:
+
+1. **Package.json Placeholder**: `"version": "0.0.0-release-it"` is a placeholder
+2. **Git Tags**: Actual versions are stored as Git tags (e.g., `v0.1.0`, `v1.2.3`)
+3. **Release-it**: Automatically bumps versions and updates package.json during releases
+4. **CICD Pipeline**: Dynamically replaces the placeholder with the actual version
+
+### Release Commands:
+```bash
+pnpm run release        # Auto-detect version bump based on commits
+pnpm run release:patch  # 0.1.0 -> 0.1.1
+pnpm run release:minor  # 0.1.0 -> 0.2.0  
+pnpm run release:major  # 0.1.0 -> 1.0.0
+```
+
+**Never manually change the version in package.json** - let release-it handle it!
 
 ## Next Steps
 
