@@ -68,7 +68,7 @@ jobs:
           pnpm install -g @vscode/vsce
           vsce package --no-dependencies
         
-      - name: Upload VSIX
+      - name: Upload VSIXf the 
         uses: actions/upload-artifact@v4
         with:
           name: extension-vsix
