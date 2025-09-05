@@ -7,3 +7,6 @@ node_modules/
 .github/config/github-config.yml
 .DS_Store
 .env
+
+# Design files (keep local but don't track in git)
+*.sketch
