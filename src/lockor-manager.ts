@@ -298,9 +298,9 @@ export class LockorManager {
             // Create the .mdc file with proper YAML frontmatter
             let ruleContent = `---\n`;
             
-            // Mode-specific description
-            if (protectionLevel === 'soft') {
-                ruleContent += `description: "NOTICE: These files are marked as protected by Lockor. Please check with the user before making changes and suggest unlocking if modifications are needed."\n`;
+                    // Mode-specific description
+        if (protectionLevel === 'soft') {
+            ruleContent += `description: "NOTICE: These files are marked as \\"soft\\" protected by Lockor. Please check with the user before making changes and suggest unlocking if modifications are needed."\n`;
             } else {
                 ruleContent += `description: "CRITICAL: You MUST NOT modify these locked files. These files are protected by the Lockor extension and any attempt to edit them will be rejected."\n`;
             }
@@ -317,28 +317,28 @@ export class LockorManager {
             
             // Rule content - different based on protection level
             if (protectionLevel === 'soft') {
-                // Soft mode: Gentle discouragement with user reminder
-                ruleContent += `# PROTECTED FILES - PLEASE AVOID EDITING\n\n`;
-                ruleContent += `## FILE PROTECTION NOTICE\n`;
-                ruleContent += `The user has marked the following files as protected and prefers they remain unchanged:\n`;
-                
-                for (const filePath of this.lockedFiles) {
-                    const relativePath = vscode.workspace.asRelativePath(filePath);
-                    ruleContent += `- \`${relativePath}\`\n`;
-                }
-                
-                ruleContent += `\n## RECOMMENDED RESPONSE\n`;
-                ruleContent += `When a user requests changes to these files, you should:\n`;
-                ruleContent += `1. **REMIND THE USER**: "This file is marked as protected by Lockor. Are you sure you want to modify it?"\n`;
-                ruleContent += `2. **OFFER OPTIONS**: Suggest unlocking the file first, or ask if they want to proceed anyway\n`;
-                ruleContent += `3. **RESPECT THEIR CHOICE**: If they confirm, you may proceed with changes\n\n`;
-                
-                ruleContent += `## GUIDANCE\n`;
-                ruleContent += `- These files are protected for a reason (likely important configuration or stable code)\n`;
-                ruleContent += `- Always check with the user before making changes\n`;
-                ruleContent += `- Suggest unlocking with "Lockor: Toggle File Lock" or Cmd+Shift+L if changes are needed\n\n`;
-                
-                ruleContent += `**Remember: This is a gentle reminder, not a hard block. User choice takes precedence.**\n`;
+                        // Soft mode: Gentle discouragement with user reminder
+        ruleContent += `# PROTECTED FILES - PLEASE AVOID EDITING\n\n`;
+        ruleContent += `## FILE PROTECTION NOTICE\n`;
+        ruleContent += `The user has marked the following files as protected and prefers they remain unchanged:\n`;
+        
+        for (const filePath of this.lockedFiles) {
+            const relativePath = vscode.workspace.asRelativePath(filePath);
+            ruleContent += `- \`${relativePath}\`\n`;
+        }
+        
+        ruleContent += `\n## RECOMMENDED RESPONSE\n`;
+        ruleContent += `When a user requests changes to these files, you should:\n`;
+        ruleContent += `1. **REMIND THE USER**: 'This file is marked as "soft" protected by Lockor. Are you sure you want to modify it?'\n`;
+        ruleContent += `2. **OFFER OPTIONS**: Suggest 1) unlocking the file first 2) finding an alternative path, or 3) proceed with alterations anyway\n`;
+        ruleContent += `3. **RESPECT THEIR CHOICE**: If they confirm, you may proceed with changes\n\n`;
+        
+        ruleContent += `## GUIDANCE\n`;
+        ruleContent += `- These files are protected for a reason (likely important configuration or stable code)\n`;
+        ruleContent += `- Always check with the user before making changes\n`;
+        ruleContent += `- Suggest unlocking with "Lockor: Toggle File Lock" or Cmd+Shift+L if changes are needed\n\n`;
+        
+        ruleContent += `**Remember: This is a gentle reminder, not a hard block. User choice takes precedence.**\n`;
                 } else {
         // AI-aware and Hard modes: Strong blocking
         ruleContent += `# LOCKED FILES - DO NOT EDIT\n\n`;
