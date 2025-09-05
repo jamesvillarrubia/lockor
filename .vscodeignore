@@ -31,8 +31,7 @@ PROTECTION-LEVELS.md
 src/**
 
 # Keep assets for logo and icons (but exclude design files)
-!assets/dock_128x128.png
-
+!assets/icon@0.2x_200px.png
 # Keep compiled output
 !out/extension.js
 !out/lockor-manager.js

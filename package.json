@@ -4,15 +4,30 @@
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",
-  "icon": "assets/dock_128x128.png",
+  "icon": "assets/icon@0.2x_200px.png",
   "galleryBanner": {
-    "color": "#1e1e1e",
+    "color": "#20272F",
     "theme": "dark"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/jamesvillarrubia/lockor.git"
   },
+  "homepage": "https://github.com/jamesvillarrubia/lockor#readme",
+  "bugs": {
+    "url": "https://github.com/jamesvillarrubia/lockor/issues"
+  },
+  "license": "Apache-2.0",
+  "preview": false,
+  "markdown": "github",
+  "qna": "https://github.com/jamesvillarrubia/lockor/discussions",
+  "tags": [
+    "file-lock",
+    "protection",
+    "security",
+    "cursor",
+    "vscode"
+  ],
   "engines": {
     "vscode": "^1.74.0"
   },
