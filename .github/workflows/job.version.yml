@@ -30,7 +30,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '20'
           
       - name: Configure Git
         run: |
@@ -65,14 +65,21 @@ jobs:
           }' > package.json
 
       - name: Install dependencies
-        run: npm install @release-it/conventional-changelog conventional-changelog-angular
+        run: npm install release-it @release-it/conventional-changelog conventional-changelog-angular
 
       - name: Get version
         if: steps.get_version_old.outputs.version == ''
         id: get_version_new
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(npx release-it --ci --release-version 2>&1 || echo "")
-          if [[ "$VERSION" == *"No new version to release"* || -z "$VERSION" ]]; then
+          # Capture only stdout, let stderr go to console for debugging
+          VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
+          
+          # Clean up the version string (remove any extra whitespace/newlines)
+          VERSION=$(echo "$VERSION" | tr -d '\n\r' | xargs)
+          
+          if [[ "$VERSION" == *"No new version to release"* || -z "$VERSION" || "$VERSION" == "0.0.0" ]]; then
             echo "No new version to release"
             echo "VERSION=" >> $GITHUB_ENV
             echo "version=" >> $GITHUB_OUTPUT
