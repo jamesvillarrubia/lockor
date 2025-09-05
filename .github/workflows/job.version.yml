@@ -36,6 +36,12 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Fetch tags
+        run: |
+          git fetch --tags --force
+          echo "Available tags:"
+          git tag --list
 
       - name: Get existing version tag
         id: get_version_old
@@ -73,11 +79,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Debug: Show git status and recent commits
+          echo "=== Git Status ==="
+          git status
+          echo "=== Recent commits ==="
+          git log --oneline -10
+          echo "=== Commits since last tag ==="
+          git log --oneline $(git describe --tags --abbrev=0)..HEAD
+          echo "=== Release-it analysis ==="
+          
           # Capture only stdout, let stderr go to console for debugging
           VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
           
           # Clean up the version string (remove any extra whitespace/newlines)
           VERSION=$(echo "$VERSION" | tr -d '\n\r' | xargs)
+          
+          echo "Raw version output: '$VERSION'"
           
           if [[ "$VERSION" == *"No new version to release"* || -z "$VERSION" || "$VERSION" == "0.0.0" ]]; then
             echo "No new version to release"
