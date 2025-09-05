@@ -37,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
                 await lockorManager.lockFile(activeEditor.document.uri);
+                statusBarManager.updateStatusBar(activeEditor.document.uri);
             } else {
                 vscode.window.showWarningMessage('No active file to lock');
             }
@@ -46,6 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
                 await lockorManager.unlockFile(activeEditor.document.uri);
+                statusBarManager.updateStatusBar(activeEditor.document.uri);
             } else {
                 vscode.window.showWarningMessage('No active file to unlock');
             }
@@ -58,6 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
             
             if (targetUri) {
                 await lockorManager.toggleFileLock(targetUri);
+                statusBarManager.updateStatusBar(targetUri);
             } else {
                 vscode.window.showWarningMessage('No file selected to toggle lock');
             }
@@ -173,6 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
                         ).then(async (selection) => {
                             if (selection === 'Unlock File') {
                                 await lockorManager.unlockFile(event.document.uri);
+                                statusBarManager.updateStatusBar(event.document.uri);
                             }
                         });
                     }
@@ -196,6 +200,7 @@ export function activate(context: vscode.ExtensionContext) {
                         ).then(async (selection) => {
                             if (selection === 'Unlock File') {
                                 await lockorManager.unlockFile(event.document.uri);
+                                statusBarManager.updateStatusBar(event.document.uri);
                             }
                         });
                     }
@@ -240,6 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showWarningMessage(message, 'Unlock File').then(async (selection) => {
                             if (selection === 'Unlock File') {
                                 await lockorManager.unlockFile(event.document.uri);
+                                statusBarManager.updateStatusBar(event.document.uri);
                             }
                         });
                         

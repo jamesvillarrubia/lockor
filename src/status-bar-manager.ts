@@ -11,6 +11,7 @@ import { LockorManager } from './lockor-manager';
 
 export class StatusBarManager implements vscode.Disposable {
     private statusBarItem: vscode.StatusBarItem;
+    private hideTimeout: NodeJS.Timeout | undefined;
 
     constructor(private lockorManager: LockorManager) {
         // Create status bar item
@@ -57,6 +58,12 @@ export class StatusBarManager implements vscode.Disposable {
         const isLocked = this.lockorManager.isFileLocked(uri);
         const fileName = path.basename(uri.fsPath);
 
+        // Clear any existing hide timeout
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = undefined;
+        }
+
         if (isLocked) {
             this.statusBarItem.text = '🔒 Locked';
             this.statusBarItem.tooltip = `File "${fileName}" is locked. Click to unlock.`;
@@ -72,10 +79,11 @@ export class StatusBarManager implements vscode.Disposable {
             this.statusBarItem.show();
             
             // Auto-hide after 2 seconds if file is not locked
-            setTimeout(() => {
+            this.hideTimeout = setTimeout(() => {
                 if (!this.lockorManager.isFileLocked(uri)) {
                     this.statusBarItem.hide();
                 }
+                this.hideTimeout = undefined;
             }, 2000);
         }
     }
@@ -91,6 +99,9 @@ export class StatusBarManager implements vscode.Disposable {
      * Clean up resources
      */
     public dispose(): void {
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
         this.statusBarItem.dispose();
     }
 }
