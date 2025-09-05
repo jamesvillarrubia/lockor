@@ -12,8 +12,8 @@ on:
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    # Flexible branch checking - branches that create promotion PRs
-    if: ${{ contains(fromJson('["develop", "test", "staging"]'), github.ref_name) }}
+    # Simple 2-branch flow - only develop creates PRs to main
+    if: ${{ github.ref_name == 'develop' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -29,12 +29,8 @@ jobs:
         id: versioning
         run: |
           set -x
-          # Updated 4-branch flow: develop → test → staging → main
+          # Simple 2-branch flow: develop → main
           if [ "${{ github.ref_name }}" = "develop" ]; then
-            BASE_BRANCH="test"
-          elif [ "${{ github.ref_name }}" = "test" ]; then
-            BASE_BRANCH="staging"
-          elif [ "${{ github.ref_name }}" = "staging" ]; then
             BASE_BRANCH="main"
           else
             echo "Error: Unsupported branch for PR creation: ${{ github.ref_name }}"
@@ -42,7 +38,7 @@ jobs:
           fi
           
           # Fetch latest tag on base branch
-          # Get the current commit hash on the base branch (test or main)
+          # Get the current commit hash on the base branch (main)
           BASE_COMMIT_HASH=$(git rev-parse origin/$BASE_BRANCH)
 
           # Get the tags that are on or before the base commit
