@@ -16,10 +16,10 @@ jobs:
   changes:
     uses: ./.github/workflows/job.changes.yml
 
-  # PR TITLE CHECK (only for PRs)
+  # PR TITLE CHECK (only for PRs) - Enhanced with sticky comments
   pr-title-check:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/job.pr-title-check.yml
+    uses: ./.github/workflows/job.pr-title-enhanced.yml
 
   # LINTING
   lint:
@@ -96,3 +96,8 @@ jobs:
     needs: [build-test, code-analyze]
     if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' }}
     uses: ./.github/workflows/job.create-pr.yml
+
+  # ENFORCE SQUASH COMMIT MESSAGE (when PR is merged)
+  pr-squash-enforce:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+    uses: ./.github/workflows/job.pr-squash-enforce.yml
