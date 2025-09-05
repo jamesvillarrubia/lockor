@@ -36,11 +36,12 @@ module.exports = {
           style: 'patch',
           fix: 'patch',
           perf: 'patch',
-          refactor: 'ignore',
+          refactor: 'patch',
           feat: 'minor',
           major: 'major',
         }
 
+        // Get commit types from preset configuration
         let types = (options?.preset?.types || [])
           .reduce((a, v) => {
             return { ...a, [v.type]: v.release}
