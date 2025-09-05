@@ -4,6 +4,7 @@
 .vscode/**
 .github/**
 scripts/**
+assets/**
 *.md
 !README.md
 !CHANGELOG.md
@@ -29,8 +30,8 @@ PROTECTION-LEVELS.md
 # Source files (only include compiled output)
 src/**
 
-# Keep assets for logo and icons
-!assets/**
+# Keep assets for logo and icons (but exclude design files)
+!assets/dock_128x128.png
 
 # Keep compiled output
 !out/extension.js

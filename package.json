@@ -4,7 +4,7 @@
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",
-  "icon": "assets/logo.png",
+  "icon": "assets/dock_128x128.png",
   "galleryBanner": {
     "color": "#1e1e1e",
     "theme": "dark"
