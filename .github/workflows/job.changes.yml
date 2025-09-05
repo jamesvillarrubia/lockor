@@ -25,9 +25,22 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get last tag
+      id: last-tag
+      run: |
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -z "$LAST_TAG" ]; then
+          echo "No tags found, using HEAD~1 as base"
+          echo "base=HEAD~1" >> $GITHUB_OUTPUT
+        else
+          echo "Last tag: $LAST_TAG"
+          echo "base=$LAST_TAG" >> $GITHUB_OUTPUT
+        fi
+
     - uses: dorny/paths-filter@v3
       id: filter
       with:
+        base: ${{ steps.last-tag.outputs.base }}
         filters: |
           extension:
             - 'src/**'
