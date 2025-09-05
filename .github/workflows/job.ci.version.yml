@@ -18,6 +18,7 @@ jobs:
 
   determine-version:
     runs-on: ubuntu-latest
+    # Versioning is controlled by the main pipeline
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     steps:

@@ -44,14 +44,21 @@ graph TD
 
 | Job | Purpose |
 |-----|---------|
-| `job.changes.yml` | Detects if extension or CI files changed |
-| `job.lint.yml` | TypeScript compilation + ESLint |
-| `job.analyze.code.yml` | Security scanning |
-| `job.pr-title-enhanced.yml` | PR title validation with helpful feedback |
-| `job.pr-squash-enforce.yml` | Ensures clean commit history |
-| `job.version.yml` | Semantic versioning based on commits |
-| `job.publish.yml` | Publishes to Open VSX + GitHub releases |
-| `job.auto-deps.yml` | Updates dependencies automatically |
+| **CI Jobs** | |
+| `job.ci.changes.yml` | Detects if extension or CI files changed |
+| `job.ci.version.yml` | Semantic versioning based on commits |
+| `job.ci.tag.yml` | Creates git tags for releases |
+| **Build Jobs** | |
+| `job.build.lint.yml` | TypeScript compilation + ESLint |
+| `job.build.analyze.yml` | Security scanning |
+| **Deploy Jobs** | |
+| `job.deploy.publish.yml` | Publishes to Open VSX + GitHub releases |
+| **PR Jobs** | |
+| `job.pr.title-check.yml` | PR title validation with helpful feedback |
+| `job.pr.squash-enforce.yml` | Ensures clean commit history |
+| `job.pr.create.yml` | Creates PRs between branches |
+| **Maintenance Jobs** | |
+| `job.maintenance.deps.yml` | Updates dependencies automatically |
 
 ## 🔧 Setup Requirements
 

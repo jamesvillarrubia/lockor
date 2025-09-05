@@ -9,6 +9,22 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      first_branch:
+        description: 'First branch in deployment flow (versioning/tagging)'
+        required: false
+        default: 'develop'
+        type: string
+      last_branch:
+        description: 'Last branch in deployment flow (publishing)'
+        required: false
+        default: 'main'
+        type: string
+      all_branches:
+        description: 'JSON array of all branches in CI/CD flow, excluding PRs'
+        required: false
+        default: '["develop", "main"]'
+        type: string
 
 permissions:
   contents: write
@@ -16,33 +32,30 @@ permissions:
   actions: read
   security-events: write
 
-env:
-  FIRST_BRANCH: develop
-  LAST_BRANCH: main
-  ALL_BRANCHES: '["develop", "main"]'
+
 
 jobs:
 
   # CHANGE DETECTION
   changes:
-    uses: ./.github/workflows/job.changes.yml
+    uses: ./.github/workflows/job.ci.changes.yml
 
   # PR TITLE CHECK (only for PRs) - Enhanced with sticky comments
   pr-title-check:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/job.pr-title-enhanced.yml
+    uses: ./.github/workflows/job.pr.title-check.yml
 
   # LINTING
   lint:
     needs: [changes]
     if: ${{ needs.changes.outputs.extension == 'true' || needs.changes.outputs.cicd == 'true' }}
-    uses: ./.github/workflows/job.lint.yml
+    uses: ./.github/workflows/job.build.lint.yml
 
   # SECURITY ANALYSIS
   code-analyze:
     needs: [changes]
     if: ${{ needs.changes.outputs.extension == 'true' }}
-    uses: ./.github/workflows/job.analyze.code.yml
+    uses: ./.github/workflows/job.build.analyze.yml
 
   # BUILD & TEST
   build-test:
@@ -81,23 +94,23 @@ jobs:
 
   # VERSIONING (on all configured branches)
   versioning:
-    needs: [build-test, code-analyze]
-    if: ${{ contains(fromJson(env.ALL_BRANCHES), github.ref_name) && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
-    uses: ./.github/workflows/job.version.yml
+    needs: [build-test, code-analyze, changes]
+    if: ${{ contains(fromJson(inputs.all_branches), github.ref_name) && (needs.build-test.result == 'success' || (needs.changes.result == 'success' && needs.changes.outputs.cicd == 'true')) }}
+    uses: ./.github/workflows/job.ci.version.yml
 
   # TAGGING (on first branch with version)
   tag-version:
     needs: [versioning]
-    if: ${{ github.ref_name == env.FIRST_BRANCH && needs.versioning.outputs.version != '' }}
-    uses: ./.github/workflows/job.tag.yml
+    if: ${{ github.ref_name == (inputs.first_branch || 'develop') && needs.versioning.outputs.version != '' }}
+    uses: ./.github/workflows/job.ci.tag.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
 
   # PUBLISH TO MARKETPLACE (on last branch with version)
   publish:
     needs: [tag-version, versioning]
-    if: ${{ github.ref_name == env.LAST_BRANCH && needs.versioning.outputs.version != '' }}
-    uses: ./.github/workflows/job.publish.yml
+    if: ${{ github.ref_name == (inputs.last_branch || 'main') && needs.versioning.outputs.version != '' }}
+    uses: ./.github/workflows/job.deploy.publish.yml
     secrets: inherit
     with:
       version: ${{ needs.versioning.outputs.version }}
@@ -105,12 +118,12 @@ jobs:
   # CREATE PR (on first branch)
   create-pr:
     needs: [build-test, code-analyze, versioning, tag-version]
-    if: ${{ github.ref_name == env.FIRST_BRANCH && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
-    uses: ./.github/workflows/job.create-pr.yml
+    if: ${{ github.ref_name == (inputs.first_branch || 'develop') && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
+    uses: ./.github/workflows/job.pr.create.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
 
   # ENFORCE SQUASH COMMIT MESSAGE (when PR is merged)
   pr-squash-enforce:
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
-    uses: ./.github/workflows/job.pr-squash-enforce.yml
+    uses: ./.github/workflows/job.pr.squash-enforce.yml
