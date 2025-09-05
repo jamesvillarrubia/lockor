@@ -1,6 +1,6 @@
 {
   "name": "lockor",
-  "version": "0.0.0-release-it",
+  "version": "0.1.11",
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",

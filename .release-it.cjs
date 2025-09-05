@@ -2,9 +2,13 @@ module.exports = {
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
-    "tag": false,
+    "tag": true,
     "push": false,
     "tagMatch": "v[0-9]*.[0-9]*.[0-9]*"
+  },
+  "version": {
+    "increment": "auto",
+    "source": "git"
   },
   "github": {
     "release": true,

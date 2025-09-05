@@ -189,8 +189,23 @@ else
   # Use release-it to determine next version
   log_info "Determining next version using release-it..."
   
+  # Temporarily update package.json version to match git tag for release-it
+  log_info "Temporarily updating package.json version to $CURRENT_VERSION for release-it compatibility"
+  if [[ "$DRY_RUN" == false ]]; then
+    # Backup original package.json
+    cp package.json package.json.backup
+    # Update version temporarily
+    sed -i.tmp "s/\"version\": \"0.0.0-releaseit\"/\"version\": \"$CURRENT_VERSION\"/" package.json
+    rm -f package.json.tmp
+  fi
+  
   # Get next version using release-it (suppress warnings to stderr)
   NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || echo "")
+  
+  # Restore original package.json
+  if [[ "$DRY_RUN" == false ]]; then
+    mv package.json.backup package.json
+  fi
   
   if [[ -z "$NEXT_VERSION" || "$NEXT_VERSION" == "0.0.0" ]]; then
     log_warning "No new version to release"
