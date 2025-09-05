@@ -1,6 +1,6 @@
 {
   "name": "lockor",
-  "version": "0.1.9",
+  "version": "0.0.0-release-it",
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",
@@ -162,6 +162,9 @@
     "package": "vsce package --no-dependencies",
     "publish": "ovsx publish",
     "publish:ovsx": "ovsx publish",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:dry-run": "./scripts/deploy.sh --dry-run",
+    "deploy:package-only": "./scripts/deploy.sh --skip-publish",
     "release": "release-it",
     "release:minor": "release-it minor",
     "release:major": "release-it major",

@@ -12,7 +12,6 @@
 #
 # OPTIONS:
 #   --dry-run          Show what would be done without making changes
-#   --version VERSION  Use specific version instead of auto-detection
 #   --skip-publish     Package but don't publish to Open VSX
 #   --help             Show this help message
 #
@@ -24,11 +23,11 @@
 # WORKFLOW:
 #   1. Check prerequisites and environment
 #   2. Determine next version using release-it
-#   3. Update package.json with correct version
+#   3. Clean up existing VSIX files
 #   4. Compile TypeScript
-#   5. Package extension into VSIX
+#   5. Package extension into VSIX with determined version
 #   6. Publish to Open VSX Registry
-#   7. Create git tag (optional)
+#   7. Create git tag (required for release-it source of truth)
 #
 ###############################################################################
 
@@ -44,7 +43,6 @@ NC='\033[0m' # No Color
 # Default options
 DRY_RUN=false
 SKIP_PUBLISH=false
-SPECIFIC_VERSION=""
 HELP=false
 
 # Parse command line arguments
@@ -53,10 +51,6 @@ while [[ $# -gt 0 ]]; do
     --dry-run)
       DRY_RUN=true
       shift
-      ;;
-    --version)
-      SPECIFIC_VERSION="$2"
-      shift 2
       ;;
     --skip-publish)
       SKIP_PUBLISH=true
@@ -84,14 +78,12 @@ USAGE:
 
 OPTIONS:
   --dry-run          Show what would be done without making changes
-  --version VERSION  Use specific version instead of auto-detection
   --skip-publish     Package but don't publish to Open VSX
   --help             Show this help message
 
 EXAMPLES:
-  ./scripts/deploy.sh                    # Auto-detect version and deploy
+  ./scripts/deploy.sh                    # Use release-it to determine version and deploy
   ./scripts/deploy.sh --dry-run          # See what would happen
-  ./scripts/deploy.sh --version 0.2.0    # Deploy specific version
   ./scripts/deploy.sh --skip-publish     # Package only, don't publish
 
 REQUIREMENTS:
@@ -177,68 +169,43 @@ fi
 
 log_success "Prerequisites check passed"
 
-# Determine version
-log_step "Determining version..."
+# Determine version using release-it
+log_step "Determining version using release-it..."
 
-if [[ -n "$SPECIFIC_VERSION" ]]; then
-  VERSION="$SPECIFIC_VERSION"
-  log_info "Using specified version: $VERSION"
+# Get current git tag
+CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+CURRENT_VERSION=${CURRENT_TAG#v}  # Remove 'v' prefix
+
+log_info "Current version from git tag: $CURRENT_VERSION"
+
+# Check if current commit already has a tag
+COMMIT_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+
+if [[ -n "$COMMIT_TAG" ]]; then
+  VERSION=${COMMIT_TAG#v}
+  log_info "Current commit already tagged: $VERSION"
 else
-  # Get current git tag
-  CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-  CURRENT_VERSION=${CURRENT_TAG#v}  # Remove 'v' prefix
+  # Use release-it to determine next version
+  log_info "Determining next version using release-it..."
   
-  log_info "Current version from git tag: $CURRENT_VERSION"
+  # Get next version using release-it
+  NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
+  NEXT_VERSION=$(echo "$NEXT_VERSION" | tr -d '\n\r' | xargs)
   
-  # Check if current commit already has a tag
-  COMMIT_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)
-  
-  if [[ -n "$COMMIT_TAG" ]]; then
-    VERSION=${COMMIT_TAG#v}
-    log_info "Current commit already tagged: $VERSION"
+  if [[ "$NEXT_VERSION" == *"No new version to release"* || -z "$NEXT_VERSION" || "$NEXT_VERSION" == "0.0.0" ]]; then
+    log_warning "No new version to release"
+    log_info "Current version: $CURRENT_VERSION"
+    log_info "Make some commits and try again, or run 'npx release-it' to create a release"
+    exit 0
   else
-    # Use release-it to determine next version
-    log_info "Determining next version using release-it..."
-    
-    # Create temporary package.json for release-it
-    TEMP_PACKAGE_JSON=$(mktemp)
-    cat > "$TEMP_PACKAGE_JSON" << EOF
-{
-  "name": "temp-lockor",
-  "version": "$CURRENT_VERSION"
-}
-EOF
-    
-    # Release-it dependencies are already in package.json
-    
-    # Get next version
-    NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
-    NEXT_VERSION=$(echo "$NEXT_VERSION" | tr -d '\n\r' | xargs)
-    
-    # Clean up
-    rm -f "$TEMP_PACKAGE_JSON"
-    
-    if [[ "$NEXT_VERSION" == *"No new version to release"* || -z "$NEXT_VERSION" || "$NEXT_VERSION" == "0.0.0" ]]; then
-      log_warning "No new version to release"
-      log_info "Current version: $CURRENT_VERSION"
-      log_info "Use --version to specify a version manually"
-      exit 0
-    else
-      VERSION="$NEXT_VERSION"
-      log_success "Next version determined: $VERSION"
-    fi
+    VERSION="$NEXT_VERSION"
+    log_success "Next version determined: $VERSION"
   fi
 fi
 
-# Update package.json with correct version
-log_step "Updating package.json version to $VERSION"
-
-if [[ "$DRY_RUN" == true ]]; then
-  log_info "DRY RUN: Would update package.json version to $VERSION"
-else
-  pnpm version "$VERSION" --no-git-tag-version
-  log_success "Updated package.json version to $VERSION"
-fi
+# Note: package.json version is kept at 0.0.0-release-it for release-it compatibility
+log_step "Using version $VERSION (package.json remains at 0.0.0-release-it)"
+log_info "Package.json version is intentionally kept at 0.0.0-release-it for release-it compatibility"
 
 # Install dependencies
 log_step "Installing dependencies..."
@@ -256,6 +223,22 @@ if [[ "$DRY_RUN" == true ]]; then
 else
   pnpm run compile
   log_success "TypeScript compiled"
+fi
+
+# Clean up existing VSIX files
+log_step "Cleaning up existing VSIX files..."
+
+if [[ "$DRY_RUN" == true ]]; then
+  log_info "DRY RUN: Would remove existing *.vsix files"
+else
+  # Remove all existing VSIX files
+  if ls *.vsix 1> /dev/null 2>&1; then
+    log_info "Removing existing VSIX files..."
+    rm -f *.vsix
+    log_success "Cleaned up existing VSIX files"
+  else
+    log_info "No existing VSIX files to clean up"
+  fi
 fi
 
 # Package extension
@@ -276,10 +259,10 @@ VSIX_FILE="lockor-$VERSION.vsix"
 if [[ "$DRY_RUN" == true ]]; then
   log_info "DRY RUN: Would create VSIX file: $VSIX_FILE"
 else
-  # Try to package with vsce
-  if ! vsce package --no-dependencies --out "$VSIX_FILE"; then
+  # Try to package with vsce using the determined version
+  if ! vsce package --no-dependencies --out "$VSIX_FILE" --version "$VERSION"; then
     log_warning "vsce failed, trying with npx..."
-    npx @vscode/vsce@latest package --no-dependencies --out "$VSIX_FILE"
+    npx @vscode/vsce@latest package --no-dependencies --out "$VSIX_FILE" --version "$VERSION"
   fi
   
   if [[ ! -f "$VSIX_FILE" ]]; then
@@ -320,8 +303,8 @@ else
   log_info "Skipping publish (--skip-publish flag used)"
 fi
 
-# Create git tag (optional)
-if [[ "$DRY_RUN" == false && -z "$SPECIFIC_VERSION" ]]; then
+# Create git tag (required for release-it source of truth)
+if [[ "$DRY_RUN" == false ]]; then
   log_step "Creating git tag..."
   
   TAG_NAME="v$VERSION"
@@ -330,18 +313,17 @@ if [[ "$DRY_RUN" == false && -z "$SPECIFIC_VERSION" ]]; then
   if git tag --list | grep -q "^$TAG_NAME$"; then
     log_info "Tag $TAG_NAME already exists"
   else
-    read -p "Create git tag $TAG_NAME? (y/N): " -n 1 -r
+    log_info "Creating git tag: $TAG_NAME (required for release-it source of truth)"
+    git tag "$TAG_NAME"
+    log_success "Created git tag: $TAG_NAME"
+    
+    read -p "Push tag to remote? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      git tag "$TAG_NAME"
-      log_success "Created git tag: $TAG_NAME"
-      
-      read -p "Push tag to remote? (y/N): " -n 1 -r
-      echo
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git push origin "$TAG_NAME"
-        log_success "Pushed tag to remote"
-      fi
+      git push origin "$TAG_NAME"
+      log_success "Pushed tag to remote"
+    else
+      log_warning "Tag not pushed to remote - this may affect future release-it runs"
     fi
   fi
 fi
