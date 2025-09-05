@@ -90,8 +90,11 @@ export class LockorManager {
         // Trigger status bar update
         this.onLockStateChanged(uri);
         
-        // Update cursor rules
+        // Update all AI visibility methods
         await this.updateCursorRules();
+        await this.updateWorkspaceDiagnostics();
+        await this.updateFileLockMarkers();
+        await this.updateWorkspaceStatus();
     }
 
     /**
@@ -130,8 +133,11 @@ export class LockorManager {
         // Trigger status bar update
         this.onLockStateChanged(uri);
         
-        // Update cursor rules
+        // Update all AI visibility methods
         await this.updateCursorRules();
+        await this.updateWorkspaceDiagnostics();
+        await this.updateFileLockMarkers();
+        await this.updateWorkspaceStatus();
     }
 
     /**
@@ -225,6 +231,33 @@ export class LockorManager {
     }
 
     /**
+     * Create workspace diagnostics for locked files (visible to AI)
+     */
+    private async updateWorkspaceDiagnostics(): Promise<void> {
+        try {
+            const diagnosticCollection = vscode.languages.createDiagnosticCollection('lockor');
+            diagnosticCollection.clear();
+
+            for (const filePath of this.lockedFiles) {
+                const uri = vscode.Uri.file(filePath);
+                const diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(0, 0, 0, 0),
+                    '🔒 This file is LOCKED by Lockor and should NOT be modified. Use Cmd+Shift+L to unlock.',
+                    vscode.DiagnosticSeverity.Information
+                );
+                diagnostic.source = 'Lockor';
+                diagnostic.code = 'file-locked';
+                
+                diagnosticCollection.set(uri, [diagnostic]);
+            }
+
+            console.log(`Lockor: Created diagnostics for ${this.lockedFiles.size} locked files`);
+        } catch (error) {
+            console.error('Lockor: Failed to create diagnostics:', error);
+        }
+    }
+
+    /**
      * Update .cursor/rules with locked files
      */
     private async updateCursorRules(): Promise<void> {
@@ -296,6 +329,97 @@ export class LockorManager {
             console.log(`Lockor: Updated .cursor/rules with ${this.lockedFiles.size} locked files`);
         } catch (error) {
             console.error('Lockor: Failed to update cursor rules:', error);
+        }
+    }
+
+    /**
+     * Add/remove visible lock markers in files (optional aggressive mode)
+     */
+    private async updateFileLockMarkers(): Promise<void> {
+        try {
+            const config = vscode.workspace.getConfiguration('lockor');
+            const addFileMarkers = config.get<boolean>('addVisibleMarkers', false);
+            
+            if (!addFileMarkers) {
+                return; // Feature disabled
+            }
+
+            for (const filePath of this.lockedFiles) {
+                const uri = vscode.Uri.file(filePath);
+                
+                try {
+                    const document = await vscode.workspace.openTextDocument(uri);
+                    const firstLine = document.lineAt(0).text;
+                    const lockMarker = '/* 🔒 LOCKOR: This file is LOCKED and should NOT be modified! */';
+                    
+                    // Add marker if not already present
+                    if (!firstLine.includes('LOCKOR') && !firstLine.includes('🔒')) {
+                        const edit = new vscode.WorkspaceEdit();
+                        edit.insert(uri, new vscode.Position(0, 0), lockMarker + '\n');
+                        await vscode.workspace.applyEdit(edit);
+                        console.log(`Lockor: Added lock marker to ${filePath}`);
+                    }
+                } catch (error) {
+                    console.warn(`Lockor: Could not add marker to ${filePath}:`, error);
+                }
+            }
+        } catch (error) {
+            console.error('Lockor: Failed to update file markers:', error);
+        }
+    }
+
+    /**
+     * Create/update prominent workspace status file for AI visibility
+     */
+    private async updateWorkspaceStatus(): Promise<void> {
+        try {
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+            if (!workspaceFolder) {
+                return;
+            }
+
+            const statusFile = vscode.Uri.joinPath(workspaceFolder.uri, 'LOCKOR_STATUS.md');
+            
+            if (this.lockedFiles.size === 0) {
+                // Remove status file if no locked files
+                try {
+                    await vscode.workspace.fs.delete(statusFile);
+                } catch {
+                    // File might not exist, that's fine
+                }
+                return;
+            }
+
+            const config = vscode.workspace.getConfiguration('lockor');
+            const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+            
+            let content = `# 🔒 LOCKOR FILE PROTECTION STATUS\n\n`;
+            content += `**IMPORTANT FOR AI ASSISTANTS:** The following files are LOCKED and should NOT be modified.\n\n`;
+            content += `**Protection Level:** ${protectionLevel.toUpperCase()}\n`;
+            content += `**Total Locked Files:** ${this.lockedFiles.size}\n\n`;
+            content += `## Locked Files\n\n`;
+
+            for (const filePath of this.lockedFiles) {
+                const relativePath = vscode.workspace.asRelativePath(filePath);
+                const fileName = path.basename(filePath);
+                content += `### 🔒 \`${fileName}\`\n`;
+                content += `- **Path:** \`${relativePath}\`\n`;
+                content += `- **Status:** LOCKED - DO NOT MODIFY\n`;
+                content += `- **Instructions:** This file is intentionally protected. Do not suggest changes.\n\n`;
+            }
+
+            content += `---\n\n`;
+            content += `**For AI Assistants:**\n`;
+            content += `- Do NOT suggest modifications to any files listed above\n`;
+            content += `- Treat these files as immutable reference material\n`;
+            content += `- If changes are needed, inform the user to unlock the file first\n`;
+            content += `- Use the command "Lockor: Toggle File Lock" or Cmd+Shift+L to unlock\n\n`;
+            content += `*This file is auto-generated by the Lockor extension*\n`;
+
+            await vscode.workspace.fs.writeFile(statusFile, Buffer.from(content, 'utf8'));
+            console.log(`Lockor: Updated LOCKOR_STATUS.md with ${this.lockedFiles.size} locked files`);
+        } catch (error) {
+            console.error('Lockor: Failed to update workspace status:', error);
         }
     }
 }
