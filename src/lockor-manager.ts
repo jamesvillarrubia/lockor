@@ -269,62 +269,68 @@ export class LockorManager {
             }
 
             const cursorDir = vscode.Uri.joinPath(workspaceFolder.uri, '.cursor');
-            const rulesFile = vscode.Uri.joinPath(cursorDir, 'rules');
+            const rulesDir = vscode.Uri.joinPath(cursorDir, 'rules');
+            const lockorRuleFile = vscode.Uri.joinPath(rulesDir, 'lockor.mdc');
             
-            // Ensure .cursor directory exists
+            // Ensure .cursor/rules directories exist
             try {
                 await vscode.workspace.fs.createDirectory(cursorDir);
+                await vscode.workspace.fs.createDirectory(rulesDir);
             } catch (error) {
-                // Directory might already exist, that's fine
+                // Directories might already exist, that's fine
             }
 
-            let existingRules = '';
-            try {
-                const existingContent = await vscode.workspace.fs.readFile(rulesFile);
-                existingRules = Buffer.from(existingContent).toString('utf8');
-            } catch (error) {
-                // File doesn't exist yet, that's fine
-            }
-
-            // Remove existing Lockor rules
-            const lockorStartMarker = '# === LOCKOR LOCKED FILES (AUTO-GENERATED) ===';
-            const lockorEndMarker = '# === END LOCKOR LOCKED FILES ===';
-            
-            let cleanRules = existingRules;
-            const startIndex = existingRules.indexOf(lockorStartMarker);
-            const endIndex = existingRules.indexOf(lockorEndMarker);
-            
-            if (startIndex !== -1 && endIndex !== -1) {
-                cleanRules = existingRules.substring(0, startIndex) + 
-                           existingRules.substring(endIndex + lockorEndMarker.length);
-            }
-
-            // Generate new Lockor rules
-            let lockorRules = '';
-            if (this.lockedFiles.size > 0) {
-                const config = vscode.workspace.getConfiguration('lockor');
-                const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
-                
-                lockorRules = `\n${lockorStartMarker}\n`;
-                lockorRules += `# Protection Level: ${protectionLevel}\n`;
-                lockorRules += `# These files are locked by the Lockor extension and should NOT be modified.\n`;
-                lockorRules += `# Treat them as immutable reference material.\n\n`;
-
-                for (const filePath of this.lockedFiles) {
-                    const relativePath = vscode.workspace.asRelativePath(filePath);
-                    const fileName = path.basename(filePath);
-                    lockorRules += `# LOCKED FILE: ${fileName}\n`;
-                    lockorRules += `Do not suggest changes to "${relativePath}". This file is intentionally locked and should remain unchanged.\n\n`;
+            // Generate Lockor rule content
+            if (this.lockedFiles.size === 0) {
+                // Remove the rule file if no locked files
+                try {
+                    await vscode.workspace.fs.delete(lockorRuleFile);
+                    console.log('Lockor: Removed cursor rule file (no locked files)');
+                } catch {
+                    // File might not exist, that's fine
                 }
-
-                lockorRules += `${lockorEndMarker}\n`;
+                return;
             }
-
-            // Combine rules
-            const finalRules = cleanRules.trim() + lockorRules;
+            Okay.
+            const config = vscode.workspace.getConfiguration('lockor');
+            const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
             
-            // Write back to file
-            await vscode.workspace.fs.writeFile(rulesFile, Buffer.from(finalRules, 'utf8'));
+            // Create the .mdc file with proper YAML frontmatter
+            let ruleContent = `---\n`;
+            ruleContent += `description: Lockor locked files - DO NOT MODIFY\n`;
+            ruleContent += `globs:\n`;
+            
+            // Add each locked file as a glob pattern
+            for (const filePath of this.lockedFiles) {
+                const relativePath = vscode.workspace.asRelativePath(filePath);
+                ruleContent += `  - "${relativePath}"\n`;
+            }
+            
+            ruleContent += `alwaysApply: true\n`;
+            ruleContent += `---\n\n`;
+            
+            // Rule content
+            ruleContent += `# 🔒 LOCKOR PROTECTED FILES\n\n`;
+            ruleContent += `**CRITICAL:** The following files are LOCKED by the Lockor extension and must NOT be modified.\n\n`;
+            ruleContent += `**Protection Level:** ${protectionLevel.toUpperCase()}\n\n`;
+            
+            ruleContent += `## Locked Files (DO NOT MODIFY):\n\n`;
+            for (const filePath of this.lockedFiles) {
+                const relativePath = vscode.workspace.asRelativePath(filePath);
+                const fileName = path.basename(filePath);
+                ruleContent += `- **${fileName}** (\`${relativePath}\`) - LOCKED, do not suggest any changes\n`;
+            }
+            
+            ruleContent += `\n## Instructions for AI:\n\n`;
+            ruleContent += `- Do NOT suggest modifications to any of the above files\n`;
+            ruleContent += `- Treat these files as immutable reference material\n`;
+            ruleContent += `- If changes are requested, inform the user to unlock the file first\n`;
+            ruleContent += `- Use "Lockor: Toggle File Lock" command or Cmd+Shift+L to unlock\n`;
+            ruleContent += `- These files are intentionally protected by the user\n\n`;
+            ruleContent += `*This rule is auto-generated by the Lockor extension*\n`;
+            
+            // Write the .mdc file
+            await vscode.workspace.fs.writeFile(lockorRuleFile, Buffer.from(ruleContent, 'utf8'));
             
             console.log(`Lockor: Updated .cursor/rules with ${this.lockedFiles.size} locked files`);
         } catch (error) {
