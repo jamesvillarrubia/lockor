@@ -22,12 +22,12 @@
 #
 # WORKFLOW:
 #   1. Check prerequisites and environment
-#   2. Determine next version using release-it
+#   2. Check if there's a new version to release using release-it
 #   3. Clean up existing VSIX files
 #   4. Compile TypeScript
 #   5. Package extension into VSIX with determined version
 #   6. Publish to Open VSX Registry
-#   7. Create git tag (required for release-it source of truth)
+#   7. Create git tag only after successful publishing
 #
 ###############################################################################
 
@@ -169,8 +169,8 @@ fi
 
 log_success "Prerequisites check passed"
 
-# Determine version using release-it
-log_step "Determining version using release-it..."
+# Check if there's a new version to release
+log_step "Checking if there's a new version to release..."
 
 # Get current git tag
 CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
@@ -184,15 +184,15 @@ COMMIT_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || t
 if [[ -n "$COMMIT_TAG" ]]; then
   VERSION=${COMMIT_TAG#v}
   log_info "Current commit already tagged: $VERSION"
+  SHOULD_PUBLISH=true
 else
   # Use release-it to determine next version
   log_info "Determining next version using release-it..."
   
-  # Get next version using release-it
-  NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
-  NEXT_VERSION=$(echo "$NEXT_VERSION" | tr -d '\n\r' | xargs)
+  # Get next version using release-it (suppress warnings to stderr)
+  NEXT_VERSION=$(npx release-it --ci --release-version 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || echo "")
   
-  if [[ "$NEXT_VERSION" == *"No new version to release"* || -z "$NEXT_VERSION" || "$NEXT_VERSION" == "0.0.0" ]]; then
+  if [[ -z "$NEXT_VERSION" || "$NEXT_VERSION" == "0.0.0" ]]; then
     log_warning "No new version to release"
     log_info "Current version: $CURRENT_VERSION"
     log_info "Make some commits and try again, or run 'npx release-it' to create a release"
@@ -200,7 +200,14 @@ else
   else
     VERSION="$NEXT_VERSION"
     log_success "Next version determined: $VERSION"
+    SHOULD_PUBLISH=true
   fi
+fi
+
+# Only proceed if we have a version to publish
+if [[ "$SHOULD_PUBLISH" != true ]]; then
+  log_error "No version to publish"
+  exit 1
 fi
 
 # Note: package.json version is kept at 0.0.0-release-it for release-it compatibility
@@ -303,9 +310,9 @@ else
   log_info "Skipping publish (--skip-publish flag used)"
 fi
 
-# Create git tag (required for release-it source of truth)
-if [[ "$DRY_RUN" == false ]]; then
-  log_step "Creating git tag..."
+# Create git tag only after successful publishing (if not dry run and not skip publish)
+if [[ "$DRY_RUN" == false && "$SKIP_PUBLISH" == false ]]; then
+  log_step "Creating git tag after successful publishing..."
   
   TAG_NAME="v$VERSION"
   
@@ -313,7 +320,7 @@ if [[ "$DRY_RUN" == false ]]; then
   if git tag --list | grep -q "^$TAG_NAME$"; then
     log_info "Tag $TAG_NAME already exists"
   else
-    log_info "Creating git tag: $TAG_NAME (required for release-it source of truth)"
+    log_info "Creating git tag: $TAG_NAME (marking successful release)"
     git tag "$TAG_NAME"
     log_success "Created git tag: $TAG_NAME"
     
