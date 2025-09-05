@@ -99,9 +99,11 @@ jobs:
 
   # CREATE PR (for develop branch)
   create-pr:
-    needs: [build-test, code-analyze]
-    if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' }}
+    needs: [build-test, code-analyze, versioning]
+    if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.create-pr.yml
+    with:
+      version: ${{ needs.versioning.outputs.version }}
 
   # ENFORCE SQUASH COMMIT MESSAGE (when PR is merged)
   pr-squash-enforce:
