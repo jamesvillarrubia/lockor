@@ -16,6 +16,11 @@ permissions:
   actions: read
   security-events: write
 
+env:
+  FIRST_BRANCH: develop
+  LAST_BRANCH: main
+  ALL_BRANCHES: '["develop", "main"]'
+
 jobs:
 
   # CHANGE DETECTION
@@ -74,33 +79,33 @@ jobs:
           name: extension-vsix
           path: "*.vsix"
 
-  # VERSIONING (on develop and main branches)
+  # VERSIONING (on all configured branches)
   versioning:
     needs: [build-test, code-analyze]
-    if: ${{ contains(fromJson('["develop", "main"]'), github.ref_name) && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
+    if: ${{ contains(fromJson(env.ALL_BRANCHES), github.ref_name) && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
     uses: ./.github/workflows/job.version.yml
 
-  # TAGGING (on develop branch with version)
+  # TAGGING (on first branch with version)
   tag-version:
     needs: [versioning]
-    if: ${{ github.ref == 'refs/heads/develop' && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref_name == env.FIRST_BRANCH && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.tag.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
 
-  # PUBLISH TO MARKETPLACE (on main branch with version)
+  # PUBLISH TO MARKETPLACE (on last branch with version)
   publish:
     needs: [tag-version, versioning]
-    if: ${{ github.ref == 'refs/heads/main' && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref_name == env.LAST_BRANCH && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.publish.yml
     secrets: inherit
     with:
       version: ${{ needs.versioning.outputs.version }}
 
-  # CREATE PR (on develop branch)
+  # CREATE PR (on first branch)
   create-pr:
     needs: [build-test, code-analyze, versioning, tag-version]
-    if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref_name == env.FIRST_BRANCH && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.create-pr.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
