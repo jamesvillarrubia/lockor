@@ -18,6 +18,9 @@ let statusBarManager: StatusBarManager;
 // Debouncing for document change notifications
 const notificationDebounce = new Map<string, NodeJS.Timeout>();
 
+// Track which files have already shown edit warnings this session
+const editWarningsShown = new Set<string>();
+
 /**
  * Extension activation - called when VS Code loads the extension
  */
@@ -162,10 +165,10 @@ export function activate(context: vscode.ExtensionContext) {
                 console.log(`Lockor: File IS LOCKED - attempting to save locked file: ${event.document.fileName} (Protection: ${protectionLevel})`);
 
                 if (protectionLevel === 'soft') {
-                    // Soft mode: Allow save but show warning
+                    // Soft mode: Allow human to save but show warning
                     if (showNotifications) {
                         vscode.window.showWarningMessage(
-                            `⚠️ File "${event.document.fileName}" is locked (SOFT mode). Save allowed but AI is discouraged from modifying this file.`,
+                            `⚠️ File "${event.document.fileName}" is locked (SOFT mode). You can save, but consider if changes are needed.`,
                             'Understood', 'Unlock File'
                         ).then(async (selection) => {
                             if (selection === 'Unlock File') {
@@ -173,8 +176,11 @@ export function activate(context: vscode.ExtensionContext) {
                             }
                         });
                     }
+                } else if (protectionLevel === 'ai-aware') {
+                    // AI-aware mode: Allow human to save silently (no save warning)
+                    // The edit warning (shown once per session) is sufficient
                 } else {
-                    // AI-aware and Hard modes: Block save
+                    // Hard mode: Block save for everyone
                     console.log(`Lockor: BLOCKING save for ${event.document.fileName} (${protectionLevel} mode)`);
                     
                     event.waitUntil(
@@ -184,14 +190,10 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                     
                     if (showNotifications) {
-                        let message: string;
-                        if (protectionLevel === 'ai-aware') {
-                            message = `🔒 File "${event.document.fileName}" is locked (AI-AWARE mode). Save blocked to prevent changes. AI is strictly blocked from modifying this file.`;
-                        } else { // hard mode
-                            message = `🔒 File "${event.document.fileName}" is locked (HARD mode). Save blocked and file is read-only. Maximum protection from all sources.`;
-                        }
-                            
-                        vscode.window.showErrorMessage(message, 'Unlock File').then(async (selection) => {
+                        vscode.window.showErrorMessage(
+                            `🔒 File "${event.document.fileName}" is locked (HARD mode). File is read-only and save blocked for everyone.`,
+                            'Unlock File'
+                        ).then(async (selection) => {
                             if (selection === 'Unlock File') {
                                 await lockorManager.unlockFile(event.document.uri);
                             }
@@ -211,6 +213,11 @@ export function activate(context: vscode.ExtensionContext) {
                 if (showNotifications && event.contentChanges.length > 0) {
                     const fileKey = event.document.uri.fsPath;
                     
+                    // For AI-aware mode, only show warning once per session
+                    if (protectionLevel === 'ai-aware' && editWarningsShown.has(fileKey)) {
+                        return; // Already warned about this file in this session
+                    }
+                    
                     // Clear existing timeout for this file
                     const existingTimeout = notificationDebounce.get(fileKey);
                     if (existingTimeout) {
@@ -222,9 +229,10 @@ export function activate(context: vscode.ExtensionContext) {
                         // Show mode-specific warnings when editing
                         let message: string;
                         if (protectionLevel === 'soft') {
-                            message = `⚠️ File "${event.document.fileName}" is locked (SOFT mode). You can save, but AI should avoid this file.`;
+                            message = `⚠️ File "${event.document.fileName}" is locked (SOFT mode). You can edit and save, but consider if changes are needed.`;
                         } else if (protectionLevel === 'ai-aware') {
-                            message = `⚠️ File "${event.document.fileName}" is locked (AI-AWARE mode). Save will be blocked unless you unlock first.`;
+                            message = `⚠️ File "${event.document.fileName}" is locked (AI-AWARE mode). You can edit and save, but AI is blocked from this file.`;
+                            editWarningsShown.add(fileKey); // Mark as warned for this session
                         } else { // hard mode
                             message = `⚠️ File "${event.document.fileName}" is locked (HARD mode). File is read-only and save will be blocked.`;
                         }
@@ -345,6 +353,9 @@ export function deactivate() {
         clearTimeout(timeout);
     }
     notificationDebounce.clear();
+    
+    // Clear session tracking
+    editWarningsShown.clear();
     
     console.log('Lockor extension is now deactivated');
 }

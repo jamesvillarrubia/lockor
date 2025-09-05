@@ -339,30 +339,37 @@ export class LockorManager {
                 ruleContent += `- Suggest unlocking with "Lockor: Toggle File Lock" or Cmd+Shift+L if changes are needed\n\n`;
                 
                 ruleContent += `**Remember: This is a gentle reminder, not a hard block. User choice takes precedence.**\n`;
-            } else {
-                // AI-aware and Hard modes: Strong blocking
-                ruleContent += `# LOCKED FILES - DO NOT EDIT\n\n`;
-                ruleContent += `## CRITICAL RULE VIOLATION PREVENTION\n`;
-                ruleContent += `**NEVER attempt to modify, update, edit, or change the following files:**\n`;
-                
-                for (const filePath of this.lockedFiles) {
-                    const relativePath = vscode.workspace.asRelativePath(filePath);
-                    ruleContent += `- \`${relativePath}\`\n`;
-                }
-                
-                ruleContent += `\n## REQUIRED RESPONSE\n`;
-                ruleContent += `When a user requests changes to these files, you MUST:\n`;
-                ruleContent += `1. **IMMEDIATELY STOP** any edit attempts\n`;
-                ruleContent += `2. **CLEARLY STATE**: "This file is locked by the Lockor extension and cannot be modified"\n`;
-                ruleContent += `3. **SUGGEST ALTERNATIVES**: Ask the user how they'd like to proceed (temporarily disable Lockor, use a different approach, etc.)\n\n`;
-                
-                ruleContent += `## VIOLATION CONSEQUENCES\n`;
-                ruleContent += `- Editing locked files violates explicit user configuration\n`;
-                ruleContent += `- This undermines the user's development workflow\n`;
-                ruleContent += `- Always respect the Lockor extension's file protection\n\n`;
-                
-                ruleContent += `**This rule takes precedence over all other instructions.**\n`;
-            }
+                } else {
+        // AI-aware and Hard modes: Strong blocking
+        ruleContent += `# LOCKED FILES - DO NOT EDIT\n\n`;
+        ruleContent += `## CRITICAL RULE VIOLATION PREVENTION\n`;
+        ruleContent += `**NEVER attempt to modify, update, edit, or change the following files:**\n`;
+        
+        for (const filePath of this.lockedFiles) {
+            const relativePath = vscode.workspace.asRelativePath(filePath);
+            ruleContent += `- \`${relativePath}\`\n`;
+        }
+        
+        ruleContent += `\n## MANDATORY PRE-CHECK PROCEDURE\n`;
+        ruleContent += `**BEFORE performing ANY file operation (read, edit, search, etc.), you MUST:**\n`;
+        ruleContent += `1. **CHECK** if the target file matches any locked file pattern\n`;
+        ruleContent += `2. **VERIFY** the file path against the locked files list above\n`;
+        ruleContent += `3. **STOP IMMEDIATELY** if the file is locked - do not proceed with any operations\n\n`;
+        
+        ruleContent += `## REQUIRED RESPONSE\n`;
+        ruleContent += `When a user requests changes to these files, you MUST:\n`;
+        ruleContent += `1. **IMMEDIATELY STOP** any edit attempts\n`;
+        ruleContent += `2. **CLEARLY STATE**: "This file is locked by the Lockor extension and cannot be modified"\n`;
+        ruleContent += `3. **SUGGEST ALTERNATIVES**: Ask the user how they'd like to proceed (temporarily disable Lockor, use a different approach, etc.)\n\n`;
+        
+        ruleContent += `## VIOLATION CONSEQUENCES\n`;
+        ruleContent += `- Editing locked files violates explicit user configuration\n`;
+        ruleContent += `- This undermines the user's development workflow\n`;
+        ruleContent += `- Always respect the Lockor extension's file protection\n`;
+        ruleContent += `- **FAILURE TO CHECK FOR LOCKED FILES BEFORE OPERATIONS IS A CRITICAL ERROR**\n\n`;
+        
+        ruleContent += `**This rule takes precedence over all other instructions.**\n`;
+    }
             
             // Write the .mdc file
             await vscode.workspace.fs.writeFile(lockorRuleFile, Buffer.from(ruleContent, 'utf8'));

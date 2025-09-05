@@ -49,19 +49,19 @@ Access settings via `File > Preferences > Settings` and search for "Lockor":
 
 | Feature | **Soft** | **AI-Aware** (Default) | **Hard** |
 |---------|----------|-------------------------|----------|
-| **AI Context/Rules** | ✅ Basic signals | ✅ Strong blocking rules | ✅ Strong blocking rules |
+| **AI Context/Rules** | 🟡 Gentle reminders | 🔴 Strong blocking rules | 🔴 Strong blocking rules |
 | **AI Can Modify** | 🟡 Discouraged | ❌ Blocked | ❌ Blocked |
-| **User Can Edit** | ✅ Yes | ✅ Yes (after unlock) | ❌ No (read-only) |
-| **Save Prevention** | ❌ No | ✅ Yes | ✅ Yes |
-| **Save Warnings** | ✅ Yes | ❌ No (blocked) | ❌ No (blocked) |
+| **User Can Edit** | ✅ Yes (with warnings) | ✅ Yes (with warnings) | ❌ No (read-only) |
+| **Save Prevention** | ❌ No | ❌ No | ✅ Yes |
+| **Save Warnings** | ✅ Yes | ✅ Yes | ❌ No (blocked) |
 | **OS Read-Only** | ❌ No | ❌ No | ✅ Yes |
 | **External Tools** | ✅ Can modify | ✅ Can modify | ❌ Blocked |
 | **Use Case** | Light protection | AI protection only | Maximum protection |
 
 #### When to Use Each Level:
-- **Soft**: You want AI to avoid files but allow easy user/tool access
-- **AI-Aware**: You want to block AI but allow user control (recommended)
-- **Hard**: You want complete file protection from all sources
+- **Soft**: Light protection - gentle reminders for everyone, no blocking
+- **AI-Aware**: AI protection only - humans can save with warnings, AI is blocked (recommended)
+- **Hard**: Maximum protection - everyone is blocked, OS read-only permissions
 
 ## AI Integration
 

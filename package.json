@@ -104,13 +104,13 @@
           "type": "string",
           "enum": ["soft", "ai-aware", "hard"],
           "enumDescriptions": [
-            "Soft: AI discouraged, user/tools can modify freely (warnings only)",
-            "AI-Aware: AI blocked, user can edit after unlock, tools can modify (recommended)",
-            "Hard: Everyone blocked, OS read-only permissions (maximum protection)"
+            "Soft: Gentle warnings for everyone, no save blocking, gentle AI discouragement",
+            "AI-Aware: Human can save with warnings, AI strictly blocked (recommended)",
+            "Hard: Everyone blocked, OS read-only + save blocking + strict AI rules"
           ],
           "default": "ai-aware",
           "description": "Choose protection level for locked files",
-          "markdownDescription": "**Protection Levels:**\n\n| Level | AI | User | External Tools | Save Blocking |\n|-------|----|----|----------------|---------------|\n| **Soft** | 🟡 Discouraged | ✅ Full access | ✅ Full access | ❌ No |\n| **AI-Aware** | ❌ Blocked | ✅ After unlock | ✅ Full access | ✅ Yes |\n| **Hard** | ❌ Blocked | ❌ Read-only | ❌ Read-only | ✅ Yes |"
+          "markdownDescription": "**Protection Levels:**\n\n| Level | AI Instructions | User Experience | Save Blocking | OS Read-Only |\n|-------|----------------|------------------|---------------|---------------|\n| **Soft** | 🟡 Gentle reminders | ⚠️ Warnings only | ❌ No | ❌ No |\n| **AI-Aware** | 🔴 Strict blocking | ⚠️ Warnings only | ❌ No | ❌ No |\n| **Hard** | 🔴 Strict blocking | 🔴 Hard blocked | ✅ Yes | ✅ Yes |"
         },
         "lockor.addVisibleMarkers": {
           "type": "boolean",
