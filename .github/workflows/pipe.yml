@@ -74,16 +74,16 @@ jobs:
           name: extension-vsix
           path: "*.vsix"
 
-  # VERSIONING (only on main branch)
+  # VERSIONING (on main and develop branches)
   versioning:
     needs: [build-test, code-analyze]
-    if: ${{ github.ref == 'refs/heads/main' && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
+    if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && (needs.build-test.result == 'success' || needs.changes.outputs.cicd == 'true') }}
     uses: ./.github/workflows/job.version.yml
 
-  # TAGGING (only on main branch with version)
+  # TAGGING (on develop branch with version)
   tag-version:
     needs: [versioning]
-    if: ${{ github.ref == 'refs/heads/main' && needs.versioning.outputs.version != '' }}
+    if: ${{ github.ref == 'refs/heads/develop' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.tag.yml
     with:
       version: ${{ needs.versioning.outputs.version }}
@@ -99,7 +99,7 @@ jobs:
 
   # CREATE PR (for develop branch)
   create-pr:
-    needs: [build-test, code-analyze, versioning]
+    needs: [build-test, code-analyze, versioning, tag-version]
     if: ${{ github.ref == 'refs/heads/develop' && needs.build-test.result == 'success' && needs.versioning.outputs.version != '' }}
     uses: ./.github/workflows/job.create-pr.yml
     with:
