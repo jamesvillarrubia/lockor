@@ -4,6 +4,10 @@
   "displayName": "Lockor",
   "description": "Prevent Cursor from changing certain files - a simple file locker for VS Code and Cursor",
   "publisher": "lockor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamesvillarrubia/lockor.git"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
