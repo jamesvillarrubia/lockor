@@ -160,8 +160,13 @@ export function activate(context: vscode.ExtensionContext) {
                     // Soft mode: Allow save but show warning
                     if (showNotifications) {
                         vscode.window.showWarningMessage(
-                            `⚠️ File "${event.document.fileName}" is locked (soft mode). Save allowed but AI should avoid modifications.`
-                        );
+                            `⚠️ File "${event.document.fileName}" is locked (SOFT mode). Save allowed but AI is discouraged from modifying this file.`,
+                            'Understood', 'Unlock File'
+                        ).then(async (selection) => {
+                            if (selection === 'Unlock File') {
+                                await lockorManager.unlockFile(event.document.uri);
+                            }
+                        });
                     }
                 } else {
                     // AI-aware and Hard modes: Block save
@@ -174,9 +179,12 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                     
                     if (showNotifications) {
-                        const message = protectionLevel === 'ai-aware' ? 
-                            `🔒 File "${event.document.fileName}" is locked (AI-aware mode). Unlock to allow edits while preventing AI modifications.` :
-                            `🔒 File "${event.document.fileName}" is locked (hard mode) and cannot be saved.`;
+                        let message: string;
+                        if (protectionLevel === 'ai-aware') {
+                            message = `🔒 File "${event.document.fileName}" is locked (AI-AWARE mode). Save blocked to prevent changes. AI is strictly blocked from modifying this file.`;
+                        } else { // hard mode
+                            message = `🔒 File "${event.document.fileName}" is locked (HARD mode). Save blocked and file is read-only. Maximum protection from all sources.`;
+                        }
                             
                         vscode.window.showErrorMessage(message, 'Unlock File').then(async (selection) => {
                             if (selection === 'Unlock File') {
@@ -193,13 +201,20 @@ export function activate(context: vscode.ExtensionContext) {
             if (lockorManager.isFileLocked(event.document.uri)) {
                 const config = vscode.workspace.getConfiguration('lockor');
                 const showNotifications = config.get<boolean>('showNotifications', true);
+                const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
                 
                 if (showNotifications && event.contentChanges.length > 0) {
-                    // Only show warning if there are actual content changes
-                    vscode.window.showWarningMessage(
-                        `⚠️ File "${event.document.fileName}" is locked. Changes may not be saved.`,
-                        'Unlock File'
-                    ).then(async (selection) => {
+                    // Show mode-specific warnings when editing
+                    let message: string;
+                    if (protectionLevel === 'soft') {
+                        message = `⚠️ File "${event.document.fileName}" is locked (SOFT mode). You can save, but AI should avoid this file.`;
+                    } else if (protectionLevel === 'ai-aware') {
+                        message = `⚠️ File "${event.document.fileName}" is locked (AI-AWARE mode). Save will be blocked unless you unlock first.`;
+                    } else { // hard mode
+                        message = `⚠️ File "${event.document.fileName}" is locked (HARD mode). File is read-only and save will be blocked.`;
+                    }
+                    
+                    vscode.window.showWarningMessage(message, 'Unlock File').then(async (selection) => {
                         if (selection === 'Unlock File') {
                             await lockorManager.unlockFile(event.document.uri);
                         }
