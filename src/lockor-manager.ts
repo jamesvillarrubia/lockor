@@ -381,15 +381,117 @@ export class LockorManager {
     }
 
     /**
+     * Get appropriate comment format for file based on extension
+     */
+    private getCommentFormat(filePath: string): { start?: string; end?: string; line?: string } {
+        const ext = path.extname(filePath).toLowerCase();
+        
+        // Language-specific comment formats
+        switch (ext) {
+            // Python, Shell, Ruby, YAML, Dockerfile, etc.
+            case '.py':
+            case '.sh':
+            case '.bash':
+            case '.zsh':
+            case '.rb':
+            case '.yml':
+            case '.yaml':
+            case '.dockerfile':
+            case '.gitignore':
+            case '.env':
+                return { line: '#' };
+            
+            // JavaScript, TypeScript, C/C++, Java, etc.
+            case '.js':
+            case '.ts':
+            case '.jsx':
+            case '.tsx':
+            case '.c':
+            case '.cpp':
+            case '.h':
+            case '.hpp':
+            case '.java':
+            case '.cs':
+            case '.php':
+            case '.go':
+            case '.rs':
+            case '.swift':
+            case '.kt':
+            case '.scala':
+                return { start: '/*', end: '*/' };
+            
+            // HTML, XML, SVG
+            case '.html':
+            case '.htm':
+            case '.xml':
+            case '.svg':
+            case '.vue':
+                return { start: '<!--', end: '-->' };
+            
+            // CSS, SCSS, SASS
+            case '.css':
+            case '.scss':
+            case '.sass':
+                return { start: '/*', end: '*/' };
+            
+            // SQL
+            case '.sql':
+                return { line: '--' };
+            
+            // Lua
+            case '.lua':
+                return { line: '--' };
+            
+            // R
+            case '.r':
+            case '.R':
+                return { line: '#' };
+            
+            // MATLAB
+            case '.m':
+                return { line: '%' };
+            
+            // LaTeX
+            case '.tex':
+                return { line: '%' };
+            
+            // Vim
+            case '.vim':
+                return { line: '"' };
+            
+            // Default to C-style for unknown
+            default:
+                return { start: '/*', end: '*/' };
+        }
+    }
+
+    /**
      * Add/remove visible lock markers in files (optional aggressive mode)
      */
     private async updateFileLockMarkers(): Promise<void> {
         try {
             const config = vscode.workspace.getConfiguration('lockor');
             const addFileMarkers = config.get<boolean>('addVisibleMarkers', false);
+            const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
             
             if (!addFileMarkers) {
                 return; // Feature disabled
+            }
+
+            // WARNING: In hard mode, files are read-only so markers can't be added
+            if (protectionLevel === 'hard') {
+                console.warn('Lockor: Cannot add file markers in HARD mode - files are read-only. Consider using SOFT or AI-AWARE mode for file markers.');
+                vscode.window.showWarningMessage(
+                    'Lockor: File markers disabled in HARD mode due to read-only permissions. Switch to SOFT or AI-AWARE mode to enable markers.',
+                    'Switch to AI-Aware', 'Disable Markers'
+                ).then(async (selection) => {
+                    if (selection === 'Switch to AI-Aware') {
+                        await config.update('protectionLevel', 'ai-aware', vscode.ConfigurationTarget.Workspace);
+                    } else if (selection === 'Disable Markers') {
+                        await config.update('addVisibleMarkers', false, vscode.ConfigurationTarget.Workspace);
+                    }
+                });
+                return;
             }
 
             for (const filePath of this.lockedFiles) {
@@ -398,14 +500,33 @@ export class LockorManager {
                 try {
                     const document = await vscode.workspace.openTextDocument(uri);
                     const firstLine = document.lineAt(0).text;
-                    const lockMarker = '/* 🔒 LOCKOR: This file is LOCKED and should NOT be modified! */';
+                    
+                    // Get appropriate comment format for this file
+                    const commentFormat = this.getCommentFormat(filePath);
+                    let lockMarker: string;
+                    
+                    if (commentFormat.line) {
+                        // Single-line comment (e.g., Python, Shell)
+                        lockMarker = `${commentFormat.line} 🔒 LOCKOR: This file is LOCKED and should NOT be modified!`;
+                    } else if (commentFormat.start && commentFormat.end) {
+                        // Multi-line comment (e.g., JavaScript, HTML)
+                        lockMarker = `${commentFormat.start} 🔒 LOCKOR: This file is LOCKED and should NOT be modified! ${commentFormat.end}`;
+                    } else {
+                        // Fallback to generic comment
+                        lockMarker = `/* 🔒 LOCKOR: This file is LOCKED and should NOT be modified! */`;
+                    }
                     
                     // Add marker if not already present
                     if (!firstLine.includes('LOCKOR') && !firstLine.includes('🔒')) {
                         const edit = new vscode.WorkspaceEdit();
                         edit.insert(uri, new vscode.Position(0, 0), lockMarker + '\n');
-                        await vscode.workspace.applyEdit(edit);
-                        console.log(`Lockor: Added lock marker to ${filePath}`);
+                        const success = await vscode.workspace.applyEdit(edit);
+                        
+                        if (success) {
+                            console.log(`Lockor: Added language-aware lock marker to ${filePath}`);
+                        } else {
+                            console.warn(`Lockor: Failed to add marker to ${filePath} - file may be read-only`);
+                        }
                     }
                 } catch (error) {
                     console.warn(`Lockor: Could not add marker to ${filePath}:`, error);
