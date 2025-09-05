@@ -1,3 +1,30 @@
+###############################################################################
+# AUTOMATIC PR CREATION JOB
+###############################################################################
+#
+# This job automatically creates a pull request from the first branch to the last branch.
+# It's used to move changes through the deployment pipeline (e.g., develop -> main).
+#
+# USAGE:
+#   - Run automatically on first branch when version is determined
+#   - Creates PR with conventional commit title format
+#   - Includes version information in PR description
+#
+# INPUTS:
+#   - version: The version string for the PR (required)
+#
+# CONFIGURATION:
+#   - Source branch: First branch (e.g., develop)
+#   - Target branch: Last branch (e.g., main)
+#   - PR title: "chore(release): v{version}"
+#   - Auto-merge: Disabled (requires manual review)
+#
+# BRANCH FLOW:
+#   - Automatically detects branch configuration from pipeline
+#   - Creates PR to move changes to next stage in deployment flow
+#
+###############################################################################
+
 name: "Create PR"
 
 on:

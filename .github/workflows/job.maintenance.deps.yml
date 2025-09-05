@@ -1,3 +1,32 @@
+###############################################################################
+# AUTOMATIC DEPENDENCY UPDATES JOB
+###############################################################################
+#
+# This job automatically updates project dependencies to their latest versions.
+# It runs weekly and creates pull requests with dependency updates.
+#
+# USAGE:
+#   - Runs automatically every Monday at 9 AM UTC
+#   - Can be triggered manually via workflow_dispatch
+#   - Creates PRs with updated package.json and package-lock.json
+#
+# SCHEDULE:
+#   - Weekly: Every Monday at 9:00 AM UTC
+#   - Cron: '0 9 * * 1'
+#
+# FEATURES:
+#   - Updates all dependencies to latest compatible versions
+#   - Creates separate PRs for different types of updates
+#   - Includes changelog information in PR descriptions
+#   - Supports both npm and pnpm package managers
+#
+# CONFIGURATION:
+#   - Package manager: pnpm (configurable)
+#   - Update strategy: Latest compatible versions
+#   - PR creation: Automatic with descriptive titles
+#
+###############################################################################
+
 name: "Auto Dependencies"
 
 on:

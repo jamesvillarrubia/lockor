@@ -1,3 +1,28 @@
+###############################################################################
+# SQUASH COMMIT MESSAGE ENFORCEMENT JOB
+###############################################################################
+#
+# This job enforces that merged PRs use the PR title as the squash commit message.
+# It ensures clean commit history by validating merge commit messages.
+#
+# USAGE:
+#   - Runs automatically when PRs are merged
+#   - Validates that squash commit message matches PR title
+#   - Creates comments for guidance if validation fails
+#
+# VALIDATION RULES:
+#   - Only runs on merged PRs (not closed without merge)
+#   - Checks that merge commit message matches PR title
+#   - Provides feedback if commit message doesn't match
+#
+# FEATURES:
+#   - Automatic validation on PR merge
+#   - Helpful feedback for commit message mismatches
+#   - Non-blocking (warnings only, doesn't prevent merge)
+#   - Supports both direct calls and PR event triggers
+#
+###############################################################################
+
 name: Enforce PR Title as Commit Message
 
 on:

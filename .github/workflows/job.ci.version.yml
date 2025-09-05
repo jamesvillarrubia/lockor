@@ -1,3 +1,28 @@
+###############################################################################
+# SEMANTIC VERSIONING JOB
+###############################################################################
+#
+# This job determines the next version number based on conventional commit messages.
+# It uses release-it to analyze commit history and bump the version accordingly.
+#
+# USAGE:
+#   - Run automatically on configured branches when changes are detected
+#   - Analyzes commits since last git tag
+#   - Outputs version for use by other jobs (tagging, publishing)
+#
+# VERSIONING RULES:
+#   - feat: minor version bump (0.1.0 -> 0.2.0)
+#   - fix: patch version bump (0.1.0 -> 0.1.1)  
+#   - BREAKING CHANGE: major version bump (0.1.0 -> 1.0.0)
+#   - Other commits: no version bump
+#
+# CONFIGURATION:
+#   - Config file: .release-it.cjs
+#   - Git tags: Used as version baseline
+#   - Output: version string (e.g., "0.2.0")
+#
+###############################################################################
+
 name: Versioning
 
 on:

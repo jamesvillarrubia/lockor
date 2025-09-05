@@ -1,3 +1,22 @@
+###############################################################################
+# LINT & FORMAT CHECK JOB
+###############################################################################
+#
+# This job performs TypeScript compilation and ESLint checks on the extension code.
+# It ensures code quality and catches syntax errors before deployment.
+#
+# USAGE:
+#   - Run automatically when extension files change
+#   - Can be triggered manually via workflow_dispatch
+#   - Fails the pipeline if linting errors are found
+#
+# CONFIGURATION:
+#   - TypeScript config: tsconfig.json
+#   - ESLint config: .eslintrc.json (if present)
+#   - Node.js version: 20
+#
+###############################################################################
+
 name: "Lint & Format Check"
 
 on:

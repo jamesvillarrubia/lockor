@@ -1,13 +1,35 @@
+###############################################################################
+# CHANGES DETECTION JOB
+###############################################################################
+# 
+# This job detects which types of files have changed since the last git tag.
+# It's used to conditionally run different parts of the CI/CD pipeline.
+#
+# USAGE:
+#   - Add new path categories in the 'outputs' section below
+#   - Define path patterns in the 'filters' section below  
+#   - Update debug output when adding new categories
+#
+# EXAMPLE: Adding a 'docs' category
+#   1. Add 'docs: $ {{ contains(steps.filter.outputs, 'docs') }}' to outputs
+#   2. Add 'docs: - "docs/**"' to filters
+#   3. Add 'echo "Docs: $ {{ contains(steps.filter.outputs, 'docs') }}"' to debug
+#
+###############################################################################
+
 name: "Changes"
 
 on:
   workflow_call:
     outputs:
+      # To share new path categories, add them here and update the filter paths below
       extension: 
         value: ${{ jobs.changes.outputs.extension }}
+        description: 'Whether the extension files have changed'
       cicd:
         value: ${{ jobs.changes.outputs.cicd }}
-      
+        description: 'Whether the CI/CD files have changed'
+        
   workflow_dispatch:
 
 jobs:
@@ -17,8 +39,11 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      extension: ${{ steps.filter.outputs.extension }}
-      cicd: ${{ steps.filter.outputs.cicd }}
+      # To add new path categories, add them here and update the filter paths below
+      extension: ${{ contains(steps.filter.outputs, 'extension') }}
+      cicd: ${{ contains(steps.filter.outputs, 'cicd') }}
+      
+    continue-on-error: false
     steps:
 
     - uses: actions/checkout@v4
@@ -51,8 +76,17 @@ jobs:
             - '.github/workflows/**'
             - '.release-it.cjs'
             - '.releaserc.json'
+        # To add new categories (e.g., 'docs', 'tests'), add them here:
+        # docs:
+        #   - 'docs/**'
+        #   - '*.md'
+        # tests:
+        #   - 'tests/**'
+        #   - '**/*.test.js'
+      
 
     - name: Debug Paths Filter Outputs
       run: |
-        echo "Extension: ${{ steps.filter.outputs.extension }}"
-        echo "CICD: ${{ steps.filter.outputs.cicd }}"
+        # Add new output names here when adding new path categories
+        echo "Extension: ${{ contains(steps.filter.outputs, 'extension') }}"
+        echo "CICD: ${{ contains(steps.filter.outputs, 'cicd') }}"

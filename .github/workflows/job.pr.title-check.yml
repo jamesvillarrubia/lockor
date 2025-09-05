@@ -1,3 +1,29 @@
+###############################################################################
+# PR TITLE VALIDATION JOB
+###############################################################################
+#
+# This job validates that pull request titles follow conventional commit format.
+# It provides helpful feedback and creates sticky comments for guidance.
+#
+# USAGE:
+#   - Runs automatically on PR events (opened, edited, synchronize, reopened)
+#   - Validates PR title format against conventional commit standards
+#   - Creates/updates sticky comments with validation results
+#
+# VALIDATION RULES:
+#   - Format: type(scope): description
+#   - Types: feat, fix, docs, style, refactor, test, chore, etc.
+#   - Scope: optional, describes the area of change
+#   - Description: required, describes what changed
+#
+# FEATURES:
+#   - Sticky comments that update automatically
+#   - Helpful error messages with examples
+#   - Supports both pull_request and pull_request_target events
+#   - Non-blocking (warnings only, doesn't fail the workflow)
+#
+###############################################################################
+
 name: "PR Title Format Check"
 
 on:

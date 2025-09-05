@@ -1,3 +1,22 @@
+###############################################################################
+# CODEQL SECURITY ANALYSIS JOB
+###############################################################################
+#
+# This job performs security analysis using GitHub's CodeQL engine.
+# It scans the codebase for potential security vulnerabilities and code quality issues.
+#
+# USAGE:
+#   - Run automatically when extension files change
+#   - Can be triggered manually via workflow_dispatch
+#   - Results are displayed in GitHub Security tab
+#
+# CONFIGURATION:
+#   - Languages: JavaScript/TypeScript (auto-detected)
+#   - Analysis mode: Advanced (more thorough scanning)
+#   - Permissions: security-events: write (for SARIF upload)
+#
+###############################################################################
+
 name: CodeQL Analysis
 
 on:

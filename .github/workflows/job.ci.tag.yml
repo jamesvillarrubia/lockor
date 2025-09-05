@@ -1,3 +1,25 @@
+###############################################################################
+# GIT TAGGING JOB
+###############################################################################
+#
+# This job creates a git tag for the determined version.
+# It's used to mark releases in the git history.
+#
+# USAGE:
+#   - Run automatically on first branch when version is determined
+#   - Creates lightweight git tag with version number
+#   - Tag format: v{version} (e.g., v0.2.0)
+#
+# INPUTS:
+#   - version: The version string to tag (required)
+#
+# CONFIGURATION:
+#   - Tag prefix: 'v' (e.g., v0.2.0)
+#   - Tag type: lightweight (no annotation)
+#   - Pushes tag to remote repository
+#
+###############################################################################
+
 name: "Tag"
 
 on:
