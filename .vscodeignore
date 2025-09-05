@@ -1,0 +1,38 @@
+# VS Code Extension Packaging - Files to exclude from .vsix
+
+# Development files
+.vscode/**
+.github/**
+scripts/**
+*.md
+!README.md
+!CHANGELOG.md
+
+# Build artifacts
+out/**/*.map
+*.log
+
+# Dependencies
+node_modules/**
+pnpm-lock.yaml
+
+# Development tools
+.release-it.cjs
+tsconfig.json
+
+# Test files
+test-trigger.md
+develop-test.md
+TESTING.md
+PROTECTION-LEVELS.md
+
+# Source files (only include compiled output)
+src/**
+
+# Keep assets for logo and icons
+!assets/**
+
+# Keep compiled output
+!out/extension.js
+!out/lockor-manager.js
+!out/status-bar-manager.js
