@@ -61,7 +61,6 @@ module.exports = {
           if (commit.type === 'feat') {
             features += 1;
           }
-          console.log("level", level)
           return level
         }))
 
@@ -69,8 +68,6 @@ module.exports = {
         if (breakings > 0) {
           level = 0; // major
         }
-
-        console.log("Final level:", level, "breakings:", breakings, "features:", features)
 
         return {
           level: level,

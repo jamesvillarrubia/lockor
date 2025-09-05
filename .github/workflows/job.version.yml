@@ -69,9 +69,6 @@ jobs:
           CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           CURRENT_VERSION=${CURRENT_TAG#v}  # Remove 'v' prefix
           
-          echo "Current git tag: $CURRENT_TAG"
-          echo "Current version: $CURRENT_VERSION"
-          
           # Create package.json with the correct version from git tag
           echo "{
             \"name\": \"temporary-lib\",
@@ -87,22 +84,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Debug: Show git status and recent commits
-          echo "=== Git Status ==="
-          git status
-          echo "=== Recent commits ==="
-          git log --oneline -10
-          echo "=== Commits since last tag ==="
-          git log --oneline $(git describe --tags --abbrev=0)..HEAD
-          echo "=== Release-it analysis ==="
-          
           # Capture only stdout, let stderr go to console for debugging
           VERSION=$(npx release-it --ci --release-version 2>/dev/null || echo "")
           
           # Clean up the version string (remove any extra whitespace/newlines)
           VERSION=$(echo "$VERSION" | tr -d '\n\r' | xargs)
-          
-          echo "Raw version output: '$VERSION'"
           
           if [[ "$VERSION" == *"No new version to release"* || -z "$VERSION" || "$VERSION" == "0.0.0" ]]; then
             echo "No new version to release"
