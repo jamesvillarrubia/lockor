@@ -383,3 +383,4 @@ export function deactivate() {
     
     console.log('Lockor extension is now deactivated');
 }
+// Simple pipeline test - Fri Sep  5 20:52:32 EDT 2025
