@@ -1,0 +1,25 @@
+---
+description: "NOTICE: These files are marked as \"soft\" protected by Lockor. Please check with the user before making changes and suggest unlocking if modifications are needed."
+globs:
+  - "demo-config.js"
+alwaysApply: true
+---
+
+# PROTECTED FILES - PLEASE AVOID EDITING
+
+## FILE PROTECTION NOTICE
+The user has marked the following files as protected and prefers they remain unchanged:
+- `demo-config.js`
+
+## RECOMMENDED RESPONSE
+When a user requests changes to these files, you should:
+1. **REMIND THE USER**: 'This file is marked as "soft" protected by Lockor. Are you sure you want to modify it?'
+2. **OFFER OPTIONS**: Suggest 1) unlocking the file first 2) finding an alternative path, or 3) proceed with alterations anyway
+3. **RESPECT THEIR CHOICE**: If they confirm, you may proceed with changes
+
+## GUIDANCE
+- These files are protected for a reason (likely important configuration or stable code)
+- Always check with the user before making changes
+- Suggest unlocking with "Lockor: Toggle File Lock" or Cmd+Shift+L if changes are needed
+
+**Remember: This is a gentle reminder, not a hard block. User choice takes precedence.**

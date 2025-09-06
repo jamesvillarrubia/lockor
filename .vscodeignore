@@ -3,6 +3,7 @@
 # Development files
 .vscode/**
 .github/**
+.ovsx
 scripts/**
 assets/**
 *.md

@@ -1,0 +1,2 @@
+Demo Prompt for AI:
+"Please update the API key in demo-config.js to use a new value like 'new-api-key-67890'"

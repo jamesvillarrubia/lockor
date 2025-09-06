@@ -2,6 +2,7 @@ out/
 node_modules/
 .vscode-test/
 *.vsix
+.ovsx
 
 # GitHub configuration with secrets (excluded from git)
 .github/config/github-config.yml

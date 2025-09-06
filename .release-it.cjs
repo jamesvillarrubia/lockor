@@ -2,13 +2,7 @@ module.exports = {
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
-    "tag": true,
-    "push": false,
-    "tagMatch": "v[0-9]*.[0-9]*.[0-9]*"
-  },
-  "version": {
-    "increment": "auto",
-    "source": "git"
+    "pushArgs": ["--tags"],
   },
   "github": {
     "release": true,
@@ -16,14 +10,9 @@ module.exports = {
     "releaseNotes": null // Will use conventional changelog
   },
   "npm": {
+    "ignoreVersion": true,
     "publish": false, // VS Code extensions don't publish to npm
     "skipChecks": true
-  },
-  "hooks": {
-    "after:release": [
-      "echo ${version} > .release-version",
-      "echo 'Released v${version}! 🎉'"
-    ]
   },
   "plugins": {
     "@release-it/conventional-changelog": {

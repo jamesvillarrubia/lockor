@@ -7,6 +7,9 @@
  * - Providing commands to lock/unlock files
  * - Showing visual indicators for locked files
  */
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 
 import * as vscode from 'vscode';
 import { LockorManager } from './lockor-manager';
@@ -16,14 +19,23 @@ let lockorManager: LockorManager;
 let statusBarManager: StatusBarManager;
 
 // Debouncing for document change notifications
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 const notificationDebounce = new Map<string, NodeJS.Timeout>();
 
 // Track which files have already shown edit warnings this session
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 const editWarningsShown = new Set<string>();
 
 /**
  * Extension activation - called when VS Code loads the extension
  */
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 export function activate(context: vscode.ExtensionContext) {
     console.log('Lockor extension is now active');
 
@@ -315,6 +327,9 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * Update VS Code context for AI tools
  */
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 function updateAIContext() {
     const activeEditor = vscode.window.activeTextEditor;
     const isCurrentFileLocked = activeEditor ? lockorManager.isFileLocked(activeEditor.document.uri) : false;
@@ -353,6 +368,9 @@ function updateAIContext() {
 /**
  * Extension deactivation - called when VS Code unloads the extension
  */
+// Act test change - 2025-09-06 00:40:24 UTC
+// Pipeline logic test - 2025-09-05 23:51:14 UTC
+// Act test change - 2025-09-06 00:40:24 UTC
 export function deactivate() {
     // Clean up debounce timeouts
     for (const timeout of notificationDebounce.values()) {

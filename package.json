@@ -159,6 +159,10 @@
     "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
     "package": "vsce package --no-dependencies",
     "publish": "ovsx publish",
     "publish:ovsx": "ovsx publish",
@@ -177,12 +181,14 @@
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.0",
-    "@types/node": "18.x",
+    "@types/node": "~18.19.124",
     "@types/vscode": "^1.74.0",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.0",
     "conventional-changelog-angular": "latest",
     "ovsx": "^0.10.5",
     "release-it": "^18.1.2",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   }
 }
