@@ -5,14 +5,16 @@
 
 # Lockor File Protection Status
 version: "1.0"
-generated: "2025-09-05T19:36:13.633Z"
+generated: "2025-09-06T17:46:39.469Z"
 protection_level: "soft"
-total_locked_files: 1
+total_locked_files: 2
 
 # Protected Files
 locked_files:
   - path: "demo-config.js"
     absolute: "/Users/james/Sites/published/lockor/demo-config.js"
+  - path: ".github/workflows/job.build.lint.yml"
+    absolute: "/Users/james/Sites/published/lockor/.github/workflows/job.build.lint.yml"
 
 # Protection Level Explanation
 protection_info:

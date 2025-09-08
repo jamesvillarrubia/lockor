@@ -32,7 +32,7 @@ A comprehensive script to test the CI/CD pipeline by making a small, repeatable 
 ### `quick-test.sh`
 
 A simplified version for quick pipeline testing.
-
+4
 **Usage:**
 ```bash
 ./scripts/quick-test.sh

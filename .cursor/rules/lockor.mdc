@@ -2,6 +2,7 @@
 description: "NOTICE: These files are marked as \"soft\" protected by Lockor. Please check with the user before making changes and suggest unlocking if modifications are needed."
 globs:
   - "demo-config.js"
+  - ".github/workflows/job.build.lint.yml"
 alwaysApply: true
 ---
 
@@ -10,6 +11,7 @@ alwaysApply: true
 ## FILE PROTECTION NOTICE
 The user has marked the following files as protected and prefers they remain unchanged:
 - `demo-config.js`
+- `.github/workflows/job.build.lint.yml`
 
 ## RECOMMENDED RESPONSE
 When a user requests changes to these files, you should:

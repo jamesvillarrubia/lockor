@@ -40,8 +40,8 @@ jobs:
       pull-requests: read
     outputs:
       # To add new path categories, add them here and update the filter paths below
-      extension: ${{ contains(steps.filter.outputs, 'extension') }}
-      cicd: ${{ contains(steps.filter.outputs, 'cicd') }}
+      extension: ${{ contains(steps.filter.outputs.changes, 'extension') }}
+      cicd: ${{ contains(steps.filter.outputs.changes, 'cicd') }}
       
     continue-on-error: false
     steps:
@@ -87,6 +87,6 @@ jobs:
 
     - name: Debug Paths Filter Outputs
       run: |
-        # Add new output names here when adding new path categories
-        echo "Extension: ${{ contains(steps.filter.outputs, 'extension') }}"
-        echo "CICD: ${{ contains(steps.filter.outputs, 'cicd') }}"
+        # Use the changes array which contains the filter names that matched
+        echo "Extension: ${{ contains(steps.filter.outputs.changes, 'extension') }}"
+        echo "CICD: ${{ contains(steps.filter.outputs.changes, 'cicd') }}"
