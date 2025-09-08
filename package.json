@@ -151,6 +151,12 @@
           "default": true,
           "description": "Create .lockor status file in workspace root",
           "markdownDescription": "Creates a `.lockor` YAML file in the workspace root listing all locked files. This provides a clear record of protected files that AI tools and developers can reference."
+        },
+        "lockor.autoLockGeneratedFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically lock files that Lockor generates (like .cursor/rules/lockor.mdc, .lockor, etc.)",
+          "markdownDescription": "When enabled, Lockor will automatically lock files it generates in your workspace (like `.cursor/rules/lockor.mdc` and `.lockor` status file) to prevent AI tools from modifying them."
         }
       }
     }

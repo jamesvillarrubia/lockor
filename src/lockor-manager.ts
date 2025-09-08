@@ -8,13 +8,16 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { GitHookManager } from './git-hook-manager';
 
 export class LockorManager {
     private static readonly LOCKED_FILES_KEY = 'lockor.lockedFiles';
     private lockedFiles: Set<string> = new Set();
+    private gitHookManager: GitHookManager;
 
     constructor(private context: vscode.ExtensionContext) {
         this.loadLockedFiles();
+        this.gitHookManager = new GitHookManager();
     }
 
     /**
@@ -26,6 +29,7 @@ export class LockorManager {
         console.log(`Loaded ${this.lockedFiles.size} locked files from storage`);
     }
 
+
     /**
      * Save locked files to workspace state
      */
@@ -33,6 +37,66 @@ export class LockorManager {
         const filesArray = Array.from(this.lockedFiles);
         this.context.workspaceState.update(LockorManager.LOCKED_FILES_KEY, filesArray);
         console.log(`Saved ${filesArray.length} locked files to storage`);
+    }
+
+    /**
+     * Auto-lock a file that Lockor generates (like .cursor/rules/lockor.mdc, .lockor, etc.)
+     */
+    private async autoLockGeneratedFile(filePath: string, reason: string): Promise<void> {
+        try {
+            const config = vscode.workspace.getConfiguration('lockor');
+            const autoLockGeneratedFiles = config.get<boolean>('autoLockGeneratedFiles', true);
+            
+            if (!autoLockGeneratedFiles) {
+                console.log(`Lockor: Auto-locking of generated files is disabled, skipping: ${filePath}`);
+                return;
+            }
+
+            // Skip if already locked
+            if (this.lockedFiles.has(filePath)) {
+                return;
+            }
+
+            this.lockedFiles.add(filePath);
+            this.saveLockedFiles();
+            console.log(`Lockor: Auto-locked generated file: ${filePath} (${reason})`);
+        } catch (error) {
+            console.warn(`Lockor: Failed to auto-lock generated file ${filePath}:`, error);
+        }
+    }
+
+    /**
+     * Temporarily unlock a file for updates (removes read-only flag in hard mode)
+     * Returns a function to restore the lock state
+     */
+    private async temporarilyUnlockForUpdate(filePath: string): Promise<() => Promise<void>> {
+        const config = vscode.workspace.getConfiguration('lockor');
+        const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+        const wasLocked = this.lockedFiles.has(filePath);
+        let wasReadOnly = false;
+
+        // In hard mode, temporarily remove read-only flag
+        if (protectionLevel === 'hard' && wasLocked) {
+            try {
+                await this.setFileReadOnly(filePath, false);
+                wasReadOnly = true;
+                console.log(`Lockor: Temporarily removed read-only flag for update: ${filePath}`);
+            } catch (error) {
+                console.warn(`Lockor: Could not remove read-only flag for ${filePath}:`, error);
+            }
+        }
+
+        // Return restore function
+        return async () => {
+            if (wasReadOnly && wasLocked) {
+                try {
+                    await this.setFileReadOnly(filePath, true);
+                    console.log(`Lockor: Restored read-only flag after update: ${filePath}`);
+                } catch (error) {
+                    console.warn(`Lockor: Could not restore read-only flag for ${filePath}:`, error);
+                }
+            }
+        };
     }
 
     /**
@@ -95,6 +159,9 @@ export class LockorManager {
         await this.updateWorkspaceDiagnostics();
         await this.updateFileLockMarkers();
         await this.updateWorkspaceStatus();
+        
+        // Update git hook
+        await this.gitHookManager.updateHook();
     }
 
     /**
@@ -138,6 +205,9 @@ export class LockorManager {
         await this.updateWorkspaceDiagnostics();
         await this.updateFileLockMarkers();
         await this.updateWorkspaceStatus();
+        
+        // Update git hook
+        await this.gitHookManager.updateHook();
     }
 
     /**
@@ -218,6 +288,13 @@ export class LockorManager {
      */
     public getLockedFiles(): string[] {
         return Array.from(this.lockedFiles);
+    }
+
+    /**
+     * Update git hook based on current settings
+     */
+    public async updateGitHook(): Promise<void> {
+        await this.gitHookManager.updateHook();
     }
 
     /**
@@ -371,10 +448,21 @@ export class LockorManager {
         ruleContent += `**This rule takes precedence over all other instructions.**\n`;
     }
             
-            // Write the .mdc file
-            await vscode.workspace.fs.writeFile(lockorRuleFile, Buffer.from(ruleContent, 'utf8'));
+            // Temporarily unlock if needed (for hard mode read-only files)
+            const restoreLock = await this.temporarilyUnlockForUpdate(lockorRuleFile.fsPath);
             
-            console.log(`Lockor: Updated .cursor/rules with ${this.lockedFiles.size} locked files`);
+            try {
+                // Write the .mdc file
+                await vscode.workspace.fs.writeFile(lockorRuleFile, Buffer.from(ruleContent, 'utf8'));
+                
+                // Auto-lock the generated cursor rules file
+                await this.autoLockGeneratedFile(lockorRuleFile.fsPath, 'Lockor-generated cursor rules file');
+                
+                console.log(`Lockor: Updated .cursor/rules with ${this.lockedFiles.size} locked files`);
+            } finally {
+                // Always restore the lock state
+                await restoreLock();
+            }
         } catch (error) {
             console.error('Lockor: Failed to update cursor rules:', error);
         }
@@ -567,6 +655,9 @@ export class LockorManager {
         await this.updateWorkspaceDiagnostics();
         await this.updateFileLockMarkers();
         await this.updateWorkspaceStatus();
+        
+        // Update git hook
+        await this.gitHookManager.updateHook();
     }
 
     /**
@@ -652,8 +743,20 @@ export class LockorManager {
                 yamlContent += `  os_readonly: true\n`;
             }
 
-            await vscode.workspace.fs.writeFile(statusFile, Buffer.from(yamlContent, 'utf8'));
-            console.log(`Lockor: Updated .lockor file with ${this.lockedFiles.size} locked files`);
+            // Temporarily unlock if needed (for hard mode read-only files)
+            const restoreLock = await this.temporarilyUnlockForUpdate(statusFile.fsPath);
+            
+            try {
+                await vscode.workspace.fs.writeFile(statusFile, Buffer.from(yamlContent, 'utf8'));
+                
+                // Auto-lock the generated status file
+                await this.autoLockGeneratedFile(statusFile.fsPath, 'Lockor-generated status file');
+                
+                console.log(`Lockor: Updated .lockor file with ${this.lockedFiles.size} locked files`);
+            } finally {
+                // Always restore the lock state
+                await restoreLock();
+            }
 
         } catch (error) {
             console.error('Lockor: Failed to update .lockor status file:', error);
