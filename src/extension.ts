@@ -310,6 +310,23 @@ export function activate(context: vscode.ExtensionContext) {
                         }
                     }
                 }
+                
+                // If git pre-commit hook setting changed, update hook
+                if (event.affectsConfiguration('lockor.gitPreCommitHook')) {
+                    console.log('Lockor: Git pre-commit hook setting changed, updating hook...');
+                    await lockorManager.updateGitHook();
+                    
+                    const config = vscode.workspace.getConfiguration('lockor');
+                    const hookEnabled = config.get<boolean>('gitPreCommitHook', true);
+                    const showNotifications = config.get<boolean>('showNotifications', true);
+                    
+                    if (showNotifications) {
+                        const status = hookEnabled ? 'enabled' : 'disabled';
+                        vscode.window.showInformationMessage(
+                            `🔄 Git pre-commit hook ${status}. This prevents commits of locked files.`
+                        );
+                    }
+                }
             }
         })
     ];
@@ -322,6 +339,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Initialize context for AI tools
     updateAIContext();
+    
+    // Install git hook if enabled
+    lockorManager.updateGitHook();
 }
 
 /**
