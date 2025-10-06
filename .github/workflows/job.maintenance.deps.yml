@@ -6,13 +6,13 @@
 # It runs weekly and creates pull requests with dependency updates.
 #
 # USAGE:
-#   - Runs automatically every Monday at 9 AM UTC
+#   - Called by pipe.maintenance.auto-deps.yml (scheduled weekly)
 #   - Can be triggered manually via workflow_dispatch
 #   - Creates PRs with updated package.json and package-lock.json
 #
 # SCHEDULE:
+#   - Controlled by pipe.maintenance.auto-deps.yml
 #   - Weekly: Every Monday at 9:00 AM UTC
-#   - Cron: '0 9 * * 1'
 #
 # FEATURES:
 #   - Updates all dependencies to latest compatible versions
@@ -31,9 +31,6 @@ name: "Auto Dependencies"
 
 on:
   workflow_call:
-  schedule:
-    # Run weekly on Mondays at 9 AM UTC
-    - cron: '0 9 * * 1'
   workflow_dispatch:
 
 jobs:
