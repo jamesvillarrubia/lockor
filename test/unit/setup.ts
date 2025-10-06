@@ -80,6 +80,11 @@ vi.mock('fs', () => ({
   default: {
     stat: vi.fn(),
     chmod: vi.fn(),
+    existsSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    unlinkSync: vi.fn(),
+    chmodSync: vi.fn(),
     constants: {
       S_IWUSR: 0o200,
       S_IWGRP: 0o020,
@@ -88,6 +93,11 @@ vi.mock('fs', () => ({
   },
   stat: vi.fn(),
   chmod: vi.fn(),
+  existsSync: vi.fn(),
+  mkdirSync: vi.fn(),
+  writeFileSync: vi.fn(),
+  unlinkSync: vi.fn(),
+  chmodSync: vi.fn(),
   constants: {
     S_IWUSR: 0o200,
     S_IWGRP: 0o020,
@@ -102,13 +112,27 @@ vi.mock('path', () => ({
     extname: vi.fn((path: string) => {
       const parts = path.split('.');
       return parts.length > 1 ? '.' + parts.pop() : '';
-    })
+    }),
+    join: vi.fn((...args: string[]) => args.join('/')),
+    dirname: vi.fn((path: string) => path.split('/').slice(0, -1).join('/'))
   },
   basename: vi.fn((path: string) => path.split('/').pop() || path),
   extname: vi.fn((path: string) => {
     const parts = path.split('.');
     return parts.length > 1 ? '.' + parts.pop() : '';
-  })
+  }),
+  join: vi.fn((...args: string[]) => args.join('/')),
+  dirname: vi.fn((path: string) => path.split('/').slice(0, -1).join('/'))
+}));
+
+// Mock child_process module
+vi.mock('child_process', () => ({
+  exec: vi.fn()
+}));
+
+// Mock the require-based child_process usage
+vi.mock('util', () => ({
+  promisify: vi.fn((fn: any) => fn)
 }));
 
 // Export mock for use in tests

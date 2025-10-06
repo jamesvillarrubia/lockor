@@ -11,3 +11,8 @@ node_modules/
 
 # Design files (keep local but don't track in git)
 *.sketch
+
+# Test coverage and temporary files
+coverage/
+.nyc_output/
+test-temp-*/

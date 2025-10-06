@@ -4,11 +4,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { activate, deactivate } from '../src/extension';
+import { activate, deactivate } from '../../src/extension';
 import { mockVSCode } from './setup';
 
 // Mock the classes
-vi.mock('../src/lockor-manager', () => ({
+vi.mock('../../src/lockor-manager', () => ({
   LockorManager: vi.fn().mockImplementation(() => ({
     lockFile: vi.fn(),
     unlockFile: vi.fn(),
@@ -16,11 +16,12 @@ vi.mock('../src/lockor-manager', () => ({
     showLockedFiles: vi.fn(),
     isFileLocked: vi.fn().mockReturnValue(false),
     getLockedFiles: vi.fn().mockReturnValue([]),
-    updateAllFilePermissions: vi.fn()
+    updateAllFilePermissions: vi.fn(),
+    updateGitHook: vi.fn()
   }))
 }));
 
-vi.mock('../src/status-bar-manager', () => ({
+vi.mock('../../src/status-bar-manager', () => ({
   StatusBarManager: vi.fn().mockImplementation(() => ({
     updateStatusBar: vi.fn(),
     updateVisibility: vi.fn(),
@@ -76,12 +77,12 @@ describe('Extension', () => {
   });
 
   describe('Extension Activation', () => {
-    it('should activate extension successfully', () => {
+    it('should activate extension successfully', async () => {
       expect(() => activate(mockContext)).not.toThrow();
     });
 
-    it('should register all commands', () => {
-      activate(mockContext);
+    it('should register all commands', async () => {
+      await activate(mockContext);
       
       const expectedCommands = [
         'lockor.lockFile',
@@ -104,8 +105,8 @@ describe('Extension', () => {
       });
     });
 
-    it('should register event listeners', () => {
-      activate(mockContext);
+    it('should register event listeners', async () => {
+      await activate(mockContext);
       
       expect(mockVSCode.workspace.onWillSaveTextDocument).toHaveBeenCalled();
       expect(mockVSCode.workspace.onDidChangeTextDocument).toHaveBeenCalled();
@@ -113,8 +114,8 @@ describe('Extension', () => {
       expect(mockVSCode.workspace.onDidChangeConfiguration).toHaveBeenCalled();
     });
 
-    it('should add disposables to context', () => {
-      activate(mockContext);
+    it('should add disposables to context', async () => {
+      await activate(mockContext);
       expect(mockContext.subscriptions.push).toHaveBeenCalled();
     });
   });
@@ -122,7 +123,7 @@ describe('Extension', () => {
   describe('Command Execution', () => {
     let registeredCommands: Map<string, Function>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Capture registered commands
       registeredCommands = new Map();
       mockVSCode.commands.registerCommand.mockImplementation((name: string, fn: Function) => {
@@ -130,10 +131,11 @@ describe('Extension', () => {
         return { dispose: vi.fn() };
       });
       
-      activate(mockContext);
+      await activate(mockContext);
     });
 
     it('should execute lockFile command', async () => {
+      await activate(mockContext);
       const lockFileCommand = registeredCommands.get('lockor.lockFile');
       expect(lockFileCommand).toBeDefined();
       
@@ -142,6 +144,7 @@ describe('Extension', () => {
     });
 
     it('should execute unlockFile command', async () => {
+      await activate(mockContext);
       const unlockFileCommand = registeredCommands.get('lockor.unlockFile');
       expect(unlockFileCommand).toBeDefined();
       
@@ -150,6 +153,7 @@ describe('Extension', () => {
     });
 
     it('should execute toggleLock command', async () => {
+      await activate(mockContext);
       const toggleLockCommand = registeredCommands.get('lockor.toggleLock');
       expect(toggleLockCommand).toBeDefined();
       
@@ -157,7 +161,8 @@ describe('Extension', () => {
       await expect(toggleLockCommand!()).resolves.not.toThrow();
     });
 
-    it('should execute showLockedFiles command', () => {
+    it('should execute showLockedFiles command', async () => {
+      await activate(mockContext);
       const showLockedFilesCommand = registeredCommands.get('lockor.showLockedFiles');
       expect(showLockedFilesCommand).toBeDefined();
       
@@ -165,7 +170,8 @@ describe('Extension', () => {
       expect(() => showLockedFilesCommand!()).not.toThrow();
     });
 
-    it('should execute isFileLocked command', () => {
+    it('should execute isFileLocked command', async () => {
+      await activate(mockContext);
       const isFileLockedCommand = registeredCommands.get('lockor.isFileLocked');
       expect(isFileLockedCommand).toBeDefined();
       
@@ -174,7 +180,8 @@ describe('Extension', () => {
       expect(typeof result).toBe('boolean');
     });
 
-    it('should execute getLockedFiles command', () => {
+    it('should execute getLockedFiles command', async () => {
+      await activate(mockContext);
       const getLockedFilesCommand = registeredCommands.get('lockor.getLockedFiles');
       expect(getLockedFilesCommand).toBeDefined();
       
@@ -183,7 +190,8 @@ describe('Extension', () => {
       expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should execute debugAIContext command', () => {
+    it('should execute debugAIContext command', async () => {
+      await activate(mockContext);
       const debugAIContextCommand = registeredCommands.get('lockor.debugAIContext');
       expect(debugAIContextCommand).toBeDefined();
       
@@ -194,7 +202,8 @@ describe('Extension', () => {
       expect(() => debugAIContextCommand!()).not.toThrow();
     });
 
-    it('should execute getLockStatusInfo command', () => {
+    it('should execute getLockStatusInfo command', async () => {
+      await activate(mockContext);
       const getLockStatusInfoCommand = registeredCommands.get('lockor.getLockStatusInfo');
       expect(getLockStatusInfoCommand).toBeDefined();
       
@@ -211,7 +220,7 @@ describe('Extension', () => {
   describe('Event Handling', () => {
     let eventHandlers: Map<string, Function>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Capture event handlers
       eventHandlers = new Map();
       mockVSCode.workspace.onWillSaveTextDocument.mockImplementation((handler: Function) => {
@@ -231,10 +240,11 @@ describe('Extension', () => {
         return { dispose: vi.fn() };
       });
       
-      activate(mockContext);
+      await activate(mockContext);
     });
 
-    it('should handle document save events', () => {
+    it('should handle document save events', async () => {
+      await activate(mockContext);
       const saveHandler = eventHandlers.get('onWillSaveTextDocument');
       expect(saveHandler).toBeDefined();
       
@@ -250,7 +260,8 @@ describe('Extension', () => {
       expect(() => saveHandler!(mockEvent)).not.toThrow();
     });
 
-    it('should handle document change events', () => {
+    it('should handle document change events', async () => {
+      await activate(mockContext);
       const changeHandler = eventHandlers.get('onDidChangeTextDocument');
       expect(changeHandler).toBeDefined();
       
@@ -266,7 +277,8 @@ describe('Extension', () => {
       expect(() => changeHandler!(mockEvent)).not.toThrow();
     });
 
-    it('should handle active editor changes', () => {
+    it('should handle active editor changes', async () => {
+      await activate(mockContext);
       const editorChangeHandler = eventHandlers.get('onDidChangeActiveTextEditor');
       expect(editorChangeHandler).toBeDefined();
       
@@ -298,7 +310,7 @@ describe('Extension', () => {
         return { dispose: vi.fn() };
       });
       
-      activate(mockContext);
+      await activate(mockContext);
       
       const lockFileCommand = registeredCommands!.get('lockor.lockFile');
       await expect(lockFileCommand!()).resolves.not.toThrow();

@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { StatusBarManager } from '../src/status-bar-manager';
-import { LockorManager } from '../src/lockor-manager';
+import { StatusBarManager } from '../../src/status-bar-manager';
+import { LockorManager } from '../../src/lockor-manager';
 import { mockVSCode } from './setup';
 
 describe('StatusBarManager', () => {

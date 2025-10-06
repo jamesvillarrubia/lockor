@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { LockorManager } from '../src/lockor-manager';
+import { LockorManager } from '../../src/lockor-manager';
 import { mockVSCode } from './setup';
 
 // Mock ExtensionContext
@@ -79,9 +79,13 @@ describe('LockorManager', () => {
       // Then unlock it
       await lockorManager.unlockFile(testUri as any);
       expect(lockorManager.isFileLocked(testUri as any)).toBe(false);
+      // The unlock should result in only auto-generated files remaining
       expect(mockContext.workspaceState.update).toHaveBeenCalledWith(
         'lockor.lockedFiles',
-        []
+        expect.arrayContaining([
+          expect.stringContaining('.cursor/rules/lockor.mdc'),
+          expect.stringContaining('.lockor')
+        ])
       );
     });
 
@@ -150,9 +154,16 @@ describe('LockorManager', () => {
       await lockorManager.lockFile(testUri2 as any);
       
       const lockedFiles = lockorManager.getLockedFiles();
-      expect(lockedFiles).toHaveLength(2);
+      // Should have 2 user files plus 2 auto-generated files = 4 total
+      expect(lockedFiles).toHaveLength(4);
       expect(lockedFiles).toContain('/test/file1.txt');
       expect(lockedFiles).toContain('/test/file2.txt');
+      
+      // Check for auto-generated files
+      const hasCursorRules = lockedFiles.some(file => file.includes('.cursor/rules/lockor.mdc'));
+      const hasLockorFile = lockedFiles.some(file => file.includes('.lockor'));
+      expect(hasCursorRules).toBe(true);
+      expect(hasLockorFile).toBe(true);
     });
   });
 
