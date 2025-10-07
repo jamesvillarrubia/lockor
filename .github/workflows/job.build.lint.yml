@@ -22,6 +22,8 @@ name: "Lint & Format Check"
 on:
   workflow_call:
   workflow_dispatch:
+  # Removed standalone triggers to avoid duplication with main pipeline
+  # Linting is now only run through the main CI/CD pipeline (pipe.yml)
 
 jobs:
   lint:
