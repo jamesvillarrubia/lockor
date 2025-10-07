@@ -51,15 +51,30 @@
 
 ### Available Commands
 
+#### Core File Operations
 - `Lockor: Lock File` - Lock the currently active file
 - `Lockor: Unlock File` - Unlock the currently active file
 - `Lockor: Toggle File Lock` - Toggle lock status of current file
 - `Lockor: Show Locked Files` - View and manage all locked files
 
+#### API Commands (for AI tools and debugging)
+- `Lockor: Check if File is Locked (API)` - Check if current file is locked (shows popup)
+- `Lockor: Get All Locked Files (API)` - Get list of all locked files (shows count + details)
+- `Lockor: Get Lock Status Info (API)` - Get comprehensive lock status with AI guidance
+- `Lockor: Debug AI Context (for testing)` - Show detailed AI context and protection info
+
 ### Status Bar Indicator
 
 - 🔒 **Gold "LOCKED"** - File is protected (warning background)
 - 🔓 **"UNLOCKED"** - File can be modified (auto-hides after 2 seconds)
+
+### Verify Protection
+
+1. **Try editing a locked file** - Should see warnings based on protection level
+2. **Check status bar** - Should show 🔒 LOCKED indicator
+3. **View locked files** - `Cmd+Shift+P` → "Lockor: Show Locked Files"
+
+> **For detailed testing instructions**, see [CONTRIBUTING.md](./CONTRIBUTING.md) - comprehensive testing guide for contributors.
 
 ## ⚙️ Configuration
 

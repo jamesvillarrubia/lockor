@@ -78,11 +78,6 @@
         "category": "Lockor"
       },
       {
-        "command": "lockor.getLockStatusInfo",
-        "title": "Get Lock Status Info (API)",
-        "category": "Lockor"
-      },
-      {
         "command": "lockor.debugAIContext",
         "title": "Debug AI Context (for testing)",
         "category": "Lockor"

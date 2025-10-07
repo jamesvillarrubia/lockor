@@ -86,84 +86,183 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('lockor.isFileLocked', (uri?: vscode.Uri) => {
             const targetUri = uri || vscode.window.activeTextEditor?.document.uri;
             if (targetUri) {
-                return lockorManager.isFileLocked(targetUri);
+                const isLocked = lockorManager.isFileLocked(targetUri);
+                const fileName = require('path').basename(targetUri.fsPath);
+                const filePath = targetUri.fsPath;
+                
+                console.log(`Lockor: File ${fileName} is ${isLocked ? 'LOCKED' : 'UNLOCKED'}`);
+                
+                const status = isLocked ? '🔒 LOCKED' : '🔓 UNLOCKED';
+                const message = `Lockor: File Lock Status - ${fileName} is ${status}`;
+                
+                vscode.window.showInformationMessage(message, 'View Details').then(selection => {
+                    if (selection === 'View Details') {
+                        // Create a temporary document to show formatted details
+                        const details = `Lockor: File Lock Status Details
+
+File: ${fileName}
+Full Path: ${filePath}
+Lock Status: ${status}
+Checked: ${new Date().toLocaleString()}`;
+                        
+                        vscode.workspace.openTextDocument({ content: details, language: 'plaintext' }).then(doc => {
+                            vscode.window.showTextDocument(doc, { 
+                                viewColumn: vscode.ViewColumn.One,
+                                preserveFocus: false,
+                                preview: false
+                            });
+                        });
+                    }
+                });
+                
+                return isLocked;
             }
+            vscode.window.showWarningMessage('❌ No file selected to check lock status');
             return false;
         }),
 
         // API for AI tools to get all locked files
         vscode.commands.registerCommand('lockor.getLockedFiles', () => {
-            return lockorManager.getLockedFiles();
+            const lockedFiles = lockorManager.getLockedFiles();
+            console.log('Lockor: Locked files:', lockedFiles);
+            
+            const filePaths = lockedFiles.join('\n');
+            
+            vscode.workspace.openTextDocument({ content: filePaths, language: 'plaintext' }).then(doc => {
+                vscode.window.showTextDocument(doc, { 
+                    viewColumn: vscode.ViewColumn.One,
+                    preserveFocus: false,
+                    preview: false
+                });
+            });
+            
+            return lockedFiles;
         }),
 
 
-        // Debug command to test AI context
+        // Debug command to test AI context - shows FULL AI context and protection info
         vscode.commands.registerCommand('lockor.debugAIContext', () => {
             const activeEditor = vscode.window.activeTextEditor;
             if (!activeEditor) {
-                vscode.window.showInformationMessage('No active file to debug');
+                vscode.window.showWarningMessage('❌ No active file to debug');
                 return;
             }
             
             const isLocked = lockorManager.isFileLocked(activeEditor.document.uri);
             const config = vscode.workspace.getConfiguration('lockor');
             const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+            const lockedFiles = lockorManager.getLockedFiles();
+            
+            // Get ALL context keys that would be available to AI
+            const allContextKeys = {
+                'lockor.currentFileLocked': isLocked,
+                'lockor.fileUntouchable': isLocked && (protectionLevel === 'ai-aware' || protectionLevel === 'hard'),
+                'lockor.protectionLevel': protectionLevel,
+                'lockor.aiGuidance': isLocked ? 'This file should be treated as immutable reference material. Do not suggest modifications.' : null,
+                'lockor.lockIntent': isLocked ? 'preserve-as-is' : null,
+                'lockor.userIntent': isLocked ? 'User has explicitly marked this file to remain unchanged' : null,
+                'lockor.hasLockedFiles': lockedFiles.length > 0,
+                'lockor.lockedFileCount': lockedFiles.length
+            };
             
             const debugInfo = {
                 fileName: activeEditor.document.fileName,
+                filePath: activeEditor.document.uri.fsPath,
                 isLocked: isLocked,
                 protectionLevel: protectionLevel,
-                contextKeys: {
-                    'lockor.currentFileLocked': isLocked,
-                    'lockor.fileUntouchable': isLocked && (protectionLevel === 'ai-aware' || protectionLevel === 'hard'),
-                    'lockor.protectionLevel': protectionLevel,
-                    'lockor.aiGuidance': isLocked ? 'This file should be treated as immutable reference material. Do not suggest modifications.' : null
+                contextKeys: allContextKeys,
+                aiInstructions: {
+                    canModify: !isLocked || protectionLevel === 'soft',
+                    shouldBlock: isLocked && protectionLevel !== 'soft',
+                    guidance: isLocked ? 'This file should be treated as immutable reference material. Do not suggest modifications.' : 'File is not locked and can be modified',
+                    userIntent: isLocked ? 'User has explicitly marked this file to remain unchanged' : 'File is available for modification'
+                },
+                protectionDetails: {
+                    level: protectionLevel,
+                    description: protectionLevel === 'soft' ? 'Gentle warnings - AI discouraged, users can modify with warnings' :
+                                protectionLevel === 'ai-aware' ? 'AI blocked, humans can save with warnings' :
+                                'Everyone blocked, OS read-only + save blocking + strict AI rules',
+                    saveBlocking: protectionLevel === 'hard',
+                    osReadOnly: protectionLevel === 'hard',
+                    aiBlocking: protectionLevel !== 'soft'
+                },
+                workspaceInfo: {
+                    totalLockedFiles: lockedFiles.length,
+                    lockedFiles: lockedFiles.map(f => require('path').basename(f)),
+                    generatedFiles: {
+                        cursorRules: '.cursor/rules/lockor.mdc',
+                        statusFile: '.lockor'
+                    }
                 }
             };
             
-            vscode.window.showInformationMessage(
-                `Debug Info: ${JSON.stringify(debugInfo, null, 2)}`,
-                'Copy to Clipboard'
-            ).then(selection => {
-                if (selection === 'Copy to Clipboard') {
+            const message = `Lockor: Full AI Context Debug - ${activeEditor.document.fileName}`;
+            
+            vscode.window.showInformationMessage(message, 'View Full Context', 'View JSON', 'Copy to Clipboard').then(selection => {
+                if (selection === 'View Full Context') {
+                    const fullContext = `Lockor: Complete AI Context & Protection Info
+
+=== CURRENT FILE ===
+File: ${activeEditor.document.fileName}
+Path: ${activeEditor.document.uri.fsPath}
+Locked: ${isLocked ? 'YES' : 'NO'}
+
+=== PROTECTION DETAILS ===
+Protection Level: ${protectionLevel.toUpperCase()}
+Description: ${debugInfo.protectionDetails.description}
+Save Blocking: ${debugInfo.protectionDetails.saveBlocking ? 'YES' : 'NO'}
+OS Read-Only: ${debugInfo.protectionDetails.osReadOnly ? 'YES' : 'NO'}
+AI Blocking: ${debugInfo.protectionDetails.aiBlocking ? 'YES' : 'NO'}
+
+=== AI CONTEXT KEYS ===
+${Object.entries(allContextKeys).map(([key, value]) => `  ${key}: ${value}`).join('\n')}
+
+=== AI INSTRUCTIONS ===
+Can Modify: ${debugInfo.aiInstructions.canModify ? 'YES' : 'NO'}
+Should Block: ${debugInfo.aiInstructions.shouldBlock ? 'YES' : 'NO'}
+Guidance: ${debugInfo.aiInstructions.guidance}
+User Intent: ${debugInfo.aiInstructions.userIntent}
+
+=== WORKSPACE INFO ===
+Total Locked Files: ${lockedFiles.length}
+Locked Files: ${lockedFiles.map(f => require('path').basename(f)).join(', ')}
+
+Generated Files:
+  - Cursor Rules: .cursor/rules/lockor.mdc
+  - Status File: .lockor
+
+=== ALL LOCKED FILES ===
+${lockedFiles.map((f, i) => `${i + 1}. ${f}`).join('\n')}`;
+                    
+                    vscode.workspace.openTextDocument({ content: fullContext, language: 'plaintext' }).then(doc => {
+                        vscode.window.showTextDocument(doc, { 
+                            viewColumn: vscode.ViewColumn.One,
+                            preserveFocus: false,
+                            preview: false
+                        });
+                    });
+                } else if (selection === 'View JSON') {
+                    const jsonData = `Lockor: Complete AI Context JSON
+
+${JSON.stringify(debugInfo, null, 2)}`;
+                    
+                    vscode.workspace.openTextDocument({ content: jsonData, language: 'json' }).then(doc => {
+                        vscode.window.showTextDocument(doc, { 
+                            viewColumn: vscode.ViewColumn.One,
+                            preserveFocus: false,
+                            preview: false
+                        });
+                    });
+                } else if (selection === 'Copy to Clipboard') {
                     vscode.env.clipboard.writeText(JSON.stringify(debugInfo, null, 2));
+                    vscode.window.showInformationMessage('✅ Full AI context copied to clipboard!');
                 }
             });
             
-            console.log('Lockor Debug AI Context:', debugInfo);
+            console.log('Lockor Full AI Context:', debugInfo);
             return debugInfo;
         }),
 
-        // API for AI tools to get lock status with file details
-        vscode.commands.registerCommand('lockor.getLockStatusInfo', () => {
-            const activeEditor = vscode.window.activeTextEditor;
-            const lockedFiles = lockorManager.getLockedFiles();
-            const config = vscode.workspace.getConfiguration('lockor');
-            const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
-            
-            const isCurrentFileLocked = activeEditor ? lockorManager.isFileLocked(activeEditor.document.uri) : false;
-            
-            return {
-                activeFile: activeEditor ? {
-                    path: activeEditor.document.uri.fsPath,
-                    fileName: activeEditor.document.fileName,
-                    isLocked: isCurrentFileLocked,
-                    protectionLevel: protectionLevel,
-                    aiGuidance: isCurrentFileLocked ? 'This file should be treated as immutable reference material. Do not suggest modifications.' : null,
-                    userIntent: isCurrentFileLocked ? 'User has explicitly marked this file to remain unchanged' : null,
-                    canAIModify: !isCurrentFileLocked || protectionLevel === 'soft'
-                } : null,
-                lockedFiles: lockedFiles.map(filePath => ({
-                    path: filePath,
-                    fileName: require('path').basename(filePath)
-                })),
-                totalLockedFiles: lockedFiles.length,
-                protectionLevel: protectionLevel,
-                aiMessage: lockedFiles.length > 0 ? 
-                    `${lockedFiles.length} files are locked and should be treated as immutable. Protection level: ${protectionLevel}` : 
-                    'No files are currently locked'
-            };
-        })
     ];
 
     // Register event listeners

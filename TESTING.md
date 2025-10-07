@@ -17,19 +17,16 @@
 1. **Lock a file** as above
 2. **Run debug command**: `Cmd+Shift+P` → "Lockor: Debug AI Context"
 3. **Check the output** - should show lock status and context keys
-4. **Open Developer Console** (`Help > Toggle Developer Tools`)
-5. **Test API calls**:
-   ```javascript
-   // Test if file is locked
-   vscode.commands.executeCommand('lockor.isFileLocked')
-   
-   // Get full lock info
-   vscode.commands.executeCommand('lockor.getLockStatusInfo')
-   ```
+4. **Test API commands via Command Palette**:
+   - `Cmd+Shift+P` → "Lockor: Check if File is Locked (API)" - Shows lock status in popup
+   - `Cmd+Shift+P` → "Lockor: Get All Locked Files (API)" - Shows count and option to view details
+   - `Cmd+Shift+P` → "Lockor: Get Lock Status Info (API)" - Shows comprehensive status with details option
+
+**Note**: The `vscode.commands` API is only available in the extension host, not in the VS Code DevTools console. Use the Command Palette to test extension commands.
 
 ### 3. Test Different Protection Levels
 
-1. **Go to Settings**: `File > Preferences > Settings`
+1. **Go to Settings**: `File > Preferences > Settings` 
 2. **Search for "Lockor"`
 3. **Change "Protection Level"** to different values:
    - **Soft**: Should allow saves but show warnings
@@ -38,23 +35,20 @@
 
 ### 4. Verify AI Awareness
 
-**Method 1: Console Testing**
-```javascript
-// In Developer Console, check context keys:
-vscode.commands.executeCommand('getContext', 'lockor.currentFileLocked')
-vscode.commands.executeCommand('getContext', 'lockor.fileUntouchable')
-vscode.commands.executeCommand('getContext', 'lockor.aiGuidance')
-```
+**Method 1: Command Palette Testing**
+1. **Open Command Palette**: `Cmd+Shift+P`
+2. **Run "Lockor: Debug AI Context"** - this shows all context keys and AI guidance
+3. **Check the output** for context keys like:
+   - `lockor.currentFileLocked`
+   - `lockor.fileUntouchable` 
+   - `lockor.aiGuidance`
 
-**Method 2: Extension API Testing**
-```javascript
-// Test the full API response
-vscode.commands.executeCommand('lockor.getLockStatusInfo').then(info => {
-  console.log('Lock Info:', info);
-  console.log('Can AI Modify:', info.activeFile?.canAIModify);
-  console.log('AI Guidance:', info.activeFile?.aiGuidance);
-});
-```
+**Method 2: API Command Testing**
+1. **Open Command Palette**: `Cmd+Shift+P`
+2. **Run "Lockor: Get Lock Status Info (API)"** - shows comprehensive lock status
+3. **Check the output** for detailed information about locked files and AI guidance
+
+**Note**: VS Code extension APIs are only accessible through the Command Palette, not through the Developer Console.
 
 **Method 3: Debug Command**
 - Use `Cmd+Shift+P` → "Lockor: Debug AI Context"
