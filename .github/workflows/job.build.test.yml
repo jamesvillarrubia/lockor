@@ -22,8 +22,26 @@ name: "Test Suite"
 on:
   workflow_call:
   workflow_dispatch:
-  # Removed push and pull_request triggers to avoid duplication with main pipeline
-  # Tests are now only run through the main CI/CD pipeline (pipe.yml)
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'vitest.config.ts'
+      - 'vitest.e2e.config.ts'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'vitest.config.ts'
+      - 'vitest.e2e.config.ts'
 
 jobs:
   test:

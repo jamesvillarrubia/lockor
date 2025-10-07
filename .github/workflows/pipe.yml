@@ -6,6 +6,7 @@ on:
       - main
       - develop
   pull_request:
+    types: [closed]
     branches:
       - main
   workflow_dispatch:
@@ -38,6 +39,7 @@ jobs:
 
   # CHANGE DETECTION
   changes:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
     uses: ./.github/workflows/job.ci.changes.yml
 
   # PR TITLE CHECK (only for PRs) - Enhanced with sticky comments
