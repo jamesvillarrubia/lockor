@@ -168,6 +168,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:coverage:unit": "vitest run --coverage test/unit/ test/integration/",
     "test:watch": "vitest --watch",
     "test:e2e": "vitest --config vitest.e2e.config.ts",
     "test:e2e:run": "vitest run --config vitest.e2e.config.ts",

@@ -83,8 +83,8 @@ jobs:
       - name: Run E2E Tests
         run: pnpm test:e2e:run
 
-      - name: Run Test Coverage
-        run: pnpm test:coverage
+      - name: Run Test Coverage (Unit + Integration only)
+        run: pnpm test:coverage:unit
 
       - name: Upload Coverage Reports
         uses: actions/upload-artifact@v4
