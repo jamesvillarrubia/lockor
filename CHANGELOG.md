@@ -8,16 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Comprehensive test suite with unit, integration, and e2e tests
+- Comprehensive test suite with unit, integration, and e2e tests (62 tests passing)
 - GitHub Actions CI/CD pipeline with automated testing
 - Auto-locking of generated files to prevent AI modification
-- Enhanced API commands with better formatting
+- Enhanced API commands with better formatting and reduced duplication
 - Test pipeline scripts for local and CI testing
+- Marketing assets and improved packaging
+- Missing marketplace fields for better VS Code marketplace integration
+- Optimized icon packaging and dock icons
+- Logo and visual assets for better branding
 
 ### Changed
 - Reorganized test structure for better maintainability
 - Improved CI workflow organization with category prefixes
 - Enhanced test coverage and reliability
+- Updated keyboard shortcuts to avoid conflicts
+- Improved deploy script to use pnpm instead of npm
+- Better version handling and deployment process
+- Status bar behavior improvements
 
 ### Fixed
 - Resolved all test failures and improved test coverage
@@ -26,6 +34,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated e2e tests from coverage to avoid file system conflicts
 - Fixed workflow permissions and duplicate cron schedules
 - Improved API command formatting and removed duplication
+- Fixed status bar lock/unlock icon visibility issues
+- Corrected gallery banner colors for better branding
+- Fixed deploy script version detection and tag creation
+- Resolved CI/CD pipeline permission issues
+- Fixed version tagging and release process
+- Improved file system handling in tests
+- Fixed notification spam and save blocking debugging
+- Resolved hard mode conflict resolution for file markers
+
+### Technical Improvements
+- Enhanced CI/CD pipeline with better error handling
+- Improved GitHub Actions workflow organization
+- Better test coverage with comprehensive test suite
+- Enhanced file protection system with auto-locking
+- Improved API command structure and formatting
+- Better error handling and user feedback
+- Enhanced workspace diagnostics integration
 
 ## [0.2.0] - 2024-09-05
 
