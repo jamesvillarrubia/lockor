@@ -1,0 +1,113 @@
+###############################################################################
+# ENFORCE FAST-FORWARD MERGE JOB
+###############################################################################
+#
+# This job enforces that PRs can only be merged with fast-forward merges.
+# It prevents merge commits that would cause squash commit validation failures.
+#
+# USAGE:
+#   - Runs automatically on PR events
+#   - Validates that the merge would be fast-forward
+#   - Fails the workflow if non-fast-forward merge is detected
+#
+# VALIDATION RULES:
+#   - Only allows fast-forward merges
+#   - Prevents merge commits that would break squash commit validation
+#   - Provides clear error messages for guidance
+#
+# FEATURES:
+#   - Automatic validation on PR events
+#   - Clear error messages for non-fast-forward merges
+#   - Prevents merge commit title mismatches
+#   - Maintains clean commit history
+#
+###############################################################################
+
+name: "Enforce Fast-Forward Merge"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_call:
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  enforce-fast-forward:
+    name: Validate Fast-Forward Merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if merge would be fast-forward
+        id: check-ff
+        run: |
+          # Get the base and head refs
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          
+          echo "Base ref: $BASE_REF"
+          echo "Head ref: $HEAD_REF"
+          
+          # Fetch the latest changes
+          git fetch origin $BASE_REF
+          git fetch origin $HEAD_REF
+          
+          # Check if the merge would be fast-forward
+          if git merge-base --is-ancestor origin/$BASE_REF origin/$HEAD_REF; then
+            echo "✅ Fast-forward merge is possible"
+            echo "is_fast_forward=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Non-fast-forward merge detected"
+            echo "is_fast_forward=false" >> $GITHUB_OUTPUT
+            
+            # Get the merge base to show divergence
+            MERGE_BASE=$(git merge-base origin/$BASE_REF origin/$HEAD_REF)
+            echo "Merge base: $MERGE_BASE"
+            
+            # Show the divergence
+            echo "Commits in base but not in head:"
+            git log --oneline origin/$HEAD_REF..origin/$BASE_REF || echo "None"
+            
+            echo "Commits in head but not in base:"
+            git log --oneline origin/$BASE_REF..origin/$HEAD_REF || echo "None"
+          fi
+
+      - name: Fail if non-fast-forward merge
+        if: steps.check-ff.outputs.is_fast_forward == 'false'
+        run: |
+          echo "❌ This PR cannot be merged as a fast-forward merge."
+          echo ""
+          echo "**Why this matters:**"
+          echo "- Non-fast-forward merges create merge commits with different titles"
+          echo "- This breaks our squash commit validation workflow"
+          echo "- It causes CI/CD pipeline failures"
+          echo ""
+          echo "**How to fix:**"
+          echo "1. Rebase your branch onto the latest main/develop"
+          echo "2. Force push your rebased branch"
+          echo "3. This will enable a fast-forward merge"
+          echo ""
+          echo "**Commands to run:**"
+          echo "```bash"
+          echo "git fetch origin"
+          echo "git rebase origin/main  # or origin/develop"
+          echo "git push --force-with-lease"
+          echo "```"
+          echo ""
+          echo "**Alternative:**"
+          echo "If you need to preserve commit history, consider squashing commits"
+          echo "before creating the PR to enable fast-forward merging."
+          
+          exit 1
+
+      - name: Success message
+        if: steps.check-ff.outputs.is_fast_forward == 'true'
+        run: |
+          echo "✅ This PR can be merged as a fast-forward merge."
+          echo "The squash commit validation will work correctly."
