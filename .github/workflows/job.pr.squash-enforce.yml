@@ -47,15 +47,7 @@ jobs:
           echo "PR Title: $TITLE"
           echo "Squash Commit Message: $MESSAGE"
 
-          # Remove PR number suffix from commit message for comparison
-          # GitHub automatically appends (#PR_NUMBER) to squash commits
-          CLEAN_MESSAGE=$(echo "$MESSAGE" | sed 's/ (#[0-9]*)//')
-          
-          echo "Cleaned Message: $CLEAN_MESSAGE"
-
-          if [[ "$CLEAN_MESSAGE" != "$TITLE" ]]; then
+          if [[ "$MESSAGE" != "$TITLE" ]]; then
             echo "❌ Commit message does not match PR title!"
-            echo "Expected: $TITLE"
-            echo "Got: $CLEAN_MESSAGE"
             exit 1
           fi
