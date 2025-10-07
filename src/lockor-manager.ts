@@ -14,10 +14,12 @@ export class LockorManager {
     private static readonly LOCKED_FILES_KEY = 'lockor.lockedFiles';
     private lockedFiles: Set<string> = new Set();
     private gitHookManager: GitHookManager;
+    private diagnosticCollection: vscode.DiagnosticCollection;
 
     constructor(private context: vscode.ExtensionContext) {
         this.loadLockedFiles();
         this.gitHookManager = new GitHookManager();
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection('lockor');
     }
 
     /**
@@ -310,10 +312,9 @@ export class LockorManager {
     /**
      * Create workspace diagnostics for locked files (visible to AI)
      */
-    private async updateWorkspaceDiagnostics(): Promise<void> {
+    public async updateWorkspaceDiagnostics(): Promise<void> {
         try {
-            const diagnosticCollection = vscode.languages.createDiagnosticCollection('lockor');
-            diagnosticCollection.clear();
+            this.diagnosticCollection.clear();
 
             for (const filePath of this.lockedFiles) {
                 const uri = vscode.Uri.file(filePath);
@@ -325,7 +326,7 @@ export class LockorManager {
                 diagnostic.source = 'Lockor';
                 diagnostic.code = 'file-locked';
                 
-                diagnosticCollection.set(uri, [diagnostic]);
+                this.diagnosticCollection.set(uri, [diagnostic]);
             }
 
             console.log(`Lockor: Created diagnostics for ${this.lockedFiles.size} locked files`);
@@ -761,5 +762,12 @@ export class LockorManager {
         } catch (error) {
             console.error('Lockor: Failed to update .lockor status file:', error);
         }
+    }
+
+    /**
+     * Dispose of the manager
+     */
+    public dispose(): void {
+        this.diagnosticCollection.dispose();
     }
 }

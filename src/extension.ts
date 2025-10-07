@@ -43,6 +43,9 @@ export function activate(context: vscode.ExtensionContext) {
     lockorManager = new LockorManager(context);
     statusBarManager = new StatusBarManager(lockorManager);
 
+    // Initialize diagnostics for existing locked files on startup
+    lockorManager.updateWorkspaceDiagnostics();
+
     // Register commands
     const commands = [
         vscode.commands.registerCommand('lockor.lockFile', async () => {
@@ -373,6 +376,33 @@ ${JSON.stringify(debugInfo, null, 2)}`;
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             statusBarManager.updateStatusBar(editor?.document.uri);
             updateAIContext();
+        }),
+
+        // Listen for when files are opened to show lock warnings
+        vscode.workspace.onDidOpenTextDocument((document) => {
+            if (lockorManager.isFileLocked(document.uri)) {
+                const config = vscode.workspace.getConfiguration('lockor');
+                const showNotifications = config.get<boolean>('showNotifications', true);
+                const protectionLevel = config.get<string>('protectionLevel', 'ai-aware');
+                
+                if (showNotifications) {
+                    let message: string;
+                    if (protectionLevel === 'soft') {
+                        message = `⚠️ File "${document.fileName}" is locked (SOFT mode). You can edit and save, but consider if changes are needed.`;
+                    } else if (protectionLevel === 'ai-aware') {
+                        message = `⚠️ File "${document.fileName}" is locked (AI-AWARE mode). You can edit and save, but AI is blocked from this file.`;
+                    } else { // hard mode
+                        message = `⚠️ File "${document.fileName}" is locked (HARD mode). File is read-only and save will be blocked.`;
+                    }
+                    
+                    vscode.window.showWarningMessage(message, 'Unlock File').then(async (selection) => {
+                        if (selection === 'Unlock File') {
+                            await lockorManager.unlockFile(document.uri);
+                            statusBarManager.updateStatusBar(document.uri);
+                        }
+                    });
+                }
+            }
         }),
 
         // Listen for context changes (used to trigger status bar updates)
