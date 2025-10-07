@@ -107,7 +107,7 @@ jobs:
   # VERSIONING (on all configured branches)
   versioning:
     needs: [build-test, code-analyze, test, changes]
-    if: ${{ contains(fromJson(inputs.all_branches), github.ref_name) && (needs.build-test.result == 'success' || (needs.changes.result == 'success' && needs.changes.outputs.cicd == 'true')) }}
+    if: ${{ contains(fromJson(inputs.all_branches || '["main"]'), github.ref_name) && (needs.build-test.result == 'success' || (needs.changes.result == 'success' && needs.changes.outputs.cicd == 'true')) }}
     uses: ./.github/workflows/job.ci.version.yml
 
   # TAGGING (on first branch with version)
