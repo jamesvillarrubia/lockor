@@ -8,19 +8,22 @@ import { vi } from 'vitest';
 // Mock VS Code API
 const mockVSCode = {
   window: {
-    showInformationMessage: vi.fn(),
+    showInformationMessage: vi.fn().mockResolvedValue(undefined),
     showWarningMessage: vi.fn(),
     showErrorMessage: vi.fn(),
     showQuickPick: vi.fn(),
     createStatusBarItem: vi.fn(),
     activeTextEditor: null,
-    onDidChangeActiveTextEditor: vi.fn()
+    onDidChangeActiveTextEditor: vi.fn(),
+    showTextDocument: vi.fn()
   },
   workspace: {
     getConfiguration: vi.fn(),
     onDidChangeConfiguration: vi.fn(),
     onWillSaveTextDocument: vi.fn(),
     onDidChangeTextDocument: vi.fn(),
+    onDidOpenTextDocument: vi.fn(),
+    openTextDocument: vi.fn().mockResolvedValue({}),
     asRelativePath: vi.fn((path: string) => path),
     workspaceFolders: [{
       uri: { fsPath: '/test/workspace' }
@@ -59,6 +62,11 @@ const mockVSCode = {
   },
   StatusBarAlignment: {
     Right: 2
+  },
+  ViewColumn: {
+    One: 1,
+    Two: 2,
+    Three: 3
   },
   ConfigurationTarget: {
     Workspace: 1

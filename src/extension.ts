@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarManager = new StatusBarManager(lockorManager);
 
     // Initialize diagnostics for existing locked files on startup
-    lockorManager.updateWorkspaceDiagnostics();
+    lockorManager.updateWorkspaceDiagnostics().catch(console.error);
 
     // Register commands
     const commands = [

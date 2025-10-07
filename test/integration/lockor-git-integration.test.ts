@@ -36,9 +36,18 @@ vi.mock('vscode', () => ({
     languages: {
         createDiagnosticCollection: vi.fn(() => ({
             clear: vi.fn(),
-            set: vi.fn()
+            set: vi.fn(),
+            dispose: vi.fn()
         }))
     },
+    Diagnostic: vi.fn(),
+    DiagnosticSeverity: {
+        Information: 1,
+        Warning: 2,
+        Error: 3
+    },
+    Range: vi.fn(),
+    Position: vi.fn(),
     workspaceState: {
         get: vi.fn(),
         update: vi.fn()

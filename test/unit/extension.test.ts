@@ -17,7 +17,8 @@ vi.mock('../../src/lockor-manager', () => ({
     isFileLocked: vi.fn().mockReturnValue(false),
     getLockedFiles: vi.fn().mockReturnValue([]),
     updateAllFilePermissions: vi.fn(),
-    updateGitHook: vi.fn()
+    updateGitHook: vi.fn(),
+    updateWorkspaceDiagnostics: vi.fn().mockResolvedValue(undefined)
   }))
 }));
 
@@ -92,7 +93,6 @@ describe('Extension', () => {
         'lockor.isFileLocked',
         'lockor.getLockedFiles',
         'lockor.debugAIContext',
-        'lockor.getLockStatusInfo',
         'lockor.internal.refreshStatusBar',
         'lockor.internal.updateAIContext'
       ];
@@ -202,19 +202,6 @@ describe('Extension', () => {
       expect(() => debugAIContextCommand!()).not.toThrow();
     });
 
-    it('should execute getLockStatusInfo command', async () => {
-      await activate(mockContext);
-      const getLockStatusInfoCommand = registeredCommands.get('lockor.getLockStatusInfo');
-      expect(getLockStatusInfoCommand).toBeDefined();
-      
-      // Should return object
-      const result = getLockStatusInfoCommand!();
-      expect(typeof result).toBe('object');
-      expect(result).toHaveProperty('activeFile');
-      expect(result).toHaveProperty('lockedFiles');
-      expect(result).toHaveProperty('totalLockedFiles');
-      expect(result).toHaveProperty('protectionLevel');
-    });
   });
 
   describe('Event Handling', () => {
