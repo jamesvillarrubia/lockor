@@ -45,6 +45,11 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/job.pr.title-check.yml
 
+  # ENFORCE FAST-FORWARD MERGE (only for PRs)
+  pr-fast-forward-check:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/job.pr.enforce-fast-forward.yml
+
   # LINTING
   lint:
     needs: [changes]
