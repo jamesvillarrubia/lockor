@@ -42,9 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved file system handling in tests
 - Fixed notification spam and save blocking debugging
 - Resolved hard mode conflict resolution for file markers
-- Fixed GitHub Actions workflow to handle PR number suffix in squash commits
-- Eliminated duplicative test execution in CI/CD pipeline
-- Optimized workflow triggers to prevent unnecessary full pipeline runs
 
 ### Technical Improvements
 - Enhanced CI/CD pipeline with better error handling
@@ -54,16 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved API command structure and formatting
 - Better error handling and user feedback
 - Enhanced workspace diagnostics integration
-
-### CI/CD Workflow Enhancements
-- Implemented sophisticated workflow triggers to eliminate duplication
-- Push to branch now runs tests + lint only (no full pipeline)
-- Full pipeline only runs on PR merge events
-- PR title validation runs on PR open/sync events
-- Squash commit validation runs on PR merge events
-- Added comprehensive workflow documentation (WORKFLOW_STRUCTURE.md)
-- Optimized CI resource usage with targeted execution
-- Reduced workflow execution time by 50%+ through elimination of duplicates
 
 ## [0.2.0] - 2024-09-05
 

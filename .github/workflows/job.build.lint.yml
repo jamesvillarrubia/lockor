@@ -22,22 +22,6 @@ name: "Lint & Format Check"
 on:
   workflow_call:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'tsconfig.json'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'tsconfig.json'
 
 jobs:
   lint:
