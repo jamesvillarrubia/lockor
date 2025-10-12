@@ -7,37 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Fast-forward merge enforcement GitHub Action to prevent squash commit validation failures
-- GitHub Action workflow file for enforcing fast-forward merges before PR merge
-- Comprehensive test suite with unit, integration, and e2e tests (62 tests passing)
-- Test configuration file for e2e tests separate from unit/integration tests
-- Auto-locking functionality for generated files (`.lockor`, `.cursor/rules/lockor.mdc`)
-- Enhanced API commands with better formatting to reduce duplication in output
-- Test pipeline trigger scripts for CI validation
-- Marketing assets (screenshots, promotional materials)
-- GitHub Actions workflow for comprehensive test suite automation
-- PR title format checking with sticky comment feedback
-- PR squash commit message validation workflow
-- Automated dependency update workflows with security scanning
+> All changes since v0.1.14 (commit e4da0ee)
 
-### Changed
-- CI/CD workflow triggers: push to branches runs tests/lint only, PR merge runs full pipeline
-- Reorganized test file structure into unit/, integration/, and e2e/ directories
-- Improved CI workflow organization with category-based prefixes (job.*, pipe.yml)
-- Enhanced conditional job execution in GitHub Actions workflows
+### Added - On Main Branch (16 commits)
+- Test pipeline trigger scripts for CI validation (8ddb92e, d799243)
+- Marketing assets including screenshots and promotional materials (ecffe69)
+- Auto-locking functionality for generated files `.lockor` and `.cursor/rules/lockor.mdc` (b71b14d)
+- Automated dependency update workflows with security scanning (408c8f6)
+- Comprehensive test suite with unit, integration, and e2e tests - 62 tests passing (319116f, 2281ffb)
+- GitHub Actions workflow for automated test suite execution (319116f)
+- Test configuration file for e2e tests separate from unit/integration tests (f41737e)
+- Enhanced API commands with better formatting to reduce output duplication (961a27f)
 
-### Fixed
-- `.lockor` file format changed from absolute to relative paths for cross-platform compatibility
-- Empty `inputs.all_branches` parameter now defaults to `["main"]` to prevent `fromJson` errors
-- Removed duplicative workflow triggers that caused tests to run multiple times
-- PR squash commit validation now strips `(#PR_NUMBER)` suffix from commit messages
-- All unit and integration test failures resolved
-- TypeScript compilation errors fixed
-- Diagnostic collection properly shows blue linting warnings for locked files
-- E2e tests separated from coverage collection to avoid file system conflicts
-- Duplicate cron schedule removed from dependency update workflow
-- Workflow permissions added for automated dependency updates
+### Changed - On Main Branch
+- Reorganized test file structure into unit/, integration/, and e2e/ directories (2281ffb)
+
+### Fixed - On Main Branch
+- Duplicate cron schedule removed from dependency update workflow (893a7e2)
+- TypeScript compilation errors resolved (4847984)
+- All unit and integration test failures fixed (8b76312)
+- E2e tests separated from coverage collection to avoid file system conflicts (f41737e)
+- Diagnostic collection properly shows blue linting warnings for locked files (e09f89f)
+
+### Added - On Feature Branch (11 additional commits)
+- Fast-forward merge enforcement GitHub Action to prevent squash commit validation failures (263b1d8, d1beef1)
+- PR squash commit message validation workflow (4154aa4)
+
+### Changed - On Feature Branch
+- CI/CD workflow triggers: push to branches runs tests/lint only, PR merge runs full pipeline (a03c211, 38b73b5, 82b6e26)
+
+### Fixed - On Feature Branch
+- `.lockor` file format changed from absolute to relative paths for cross-platform compatibility (784044a)
+- Empty `inputs.all_branches` parameter now defaults to `["main"]` to prevent `fromJson` errors (7172ece)
+- Removed duplicative workflow triggers that caused tests to run multiple times (2857d8d)
+- PR squash commit validation now strips `(#PR_NUMBER)` suffix from commit messages (4154aa4)
 
 ## [0.2.0] - 2024-09-05
 
