@@ -8,77 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Testing Infrastructure**
-  - Comprehensive test suite with unit, integration, and e2e tests (62 tests passing)
-  - Test pipeline scripts for local and CI testing
-  - Separate e2e test configuration to avoid file system conflicts
-  
-- **CI/CD Pipeline Enhancements**
-  - Sophisticated workflow triggers (push runs tests/lint only, PR merge runs full pipeline)
-  - Fast-forward merge enforcement to prevent squash commit validation failures
-  - PR squash commit message validation
-  - PR title format checking with sticky comments
-  - Automated dependency updates with security scanning
-  - Configurable branch flow system with environment variables
-  - Change detection for optimized workflow execution
-  
-- **Extension Features**
-  - Auto-locking of generated files (`.lockor`, `.cursor/rules/lockor.mdc`) to prevent AI modification
-  - Enhanced API commands with better formatting and reduced duplication
-  
-- **Packaging & Assets**
-  - Marketing assets and improved packaging
-  - Missing marketplace fields for better VS Code marketplace integration
-  - Optimized icon packaging and dock icons
-  - Logo and visual assets for better branding
+- Fast-forward merge enforcement GitHub Action to prevent squash commit validation failures
+- Comprehensive test suite with unit, integration, and e2e tests (62 tests passing)
+- Auto-locking of generated files (`.lockor`, `.cursor/rules/lockor.mdc`) to prevent AI modification
+- Enhanced API commands with better formatting and reduced duplication
+- Test pipeline scripts for local and CI testing
+- Separate e2e test configuration to avoid file system conflicts
+- Comprehensive GitHub Actions CI/CD pipeline with automated testing
+- PR squash commit message validation
+- PR title format checking with sticky comments
+- Automated dependency updates with security scanning
 
 ### Changed
-- **CI/CD Workflow Optimization**
-  - Reorganized workflow files with category prefixes (job.*, pipe.yml)
-  - Removed duplicative test runs from push events
-  - Improved workflow triggers to run tests/lint on push, full pipeline on PR merge
-  - Enhanced error handling and conditional job execution
-  
-- **Testing & Development**
-  - Reorganized test structure for better maintainability
-  - Enhanced test coverage and reliability
-  - Improved deploy script to use pnpm instead of npm
-  - Better version handling and deployment process
-  
-- **User Experience**
-  - Updated keyboard shortcuts (Cmd+Shift+L → Cmd+K Cmd+L) to avoid conflicts
-  - Improved status bar behavior and icon visibility
+- Sophisticated workflow triggers: push runs tests/lint only, PR merge runs full pipeline
+- Reorganized test structure for better maintainability  
+- Improved CI workflow organization with category prefixes (job.*, pipe.yml)
+- Enhanced test coverage and reliability
+- Better error handling and conditional job execution in workflows
 
 ### Fixed
-- **Critical Bug Fixes**
-  - `.lockor` file now uses relative paths instead of absolute paths for git sharing compatibility
-  - Resolved all test failures and improved test coverage
-  - Fixed TypeScript compilation errors
-  - Restored blue linting warnings for locked files
-  
-- **CI/CD Pipeline Fixes**
-  - Fixed empty `inputs.all_branches` causing `fromJson` errors in versioning job
-  - Removed duplicative workflow triggers causing multiple test runs
-  - Fixed PR number suffix in squash commit message validation
-  - Fixed workflow permissions and duplicate cron schedules
-  - Resolved CI/CD pipeline permission issues
-  - Fixed version tagging and release process
-  
-- **Extension Fixes**
-  - Fixed status bar lock/unlock icon visibility issues
-  - Corrected gallery banner colors for better branding
-  - Fixed deploy script version detection and tag creation
-  - Improved file system handling in tests
-  - Fixed notification spam and save blocking debugging
-  - Resolved hard mode conflict resolution for file markers
-  - Improved API command formatting and removed duplication
-
-### Technical Details
-- **Workflow Strategy**: Push to branches triggers tests and lint only; PR merge triggers full CI/CD pipeline (tests, lint, build, versioning, tagging, publishing)
-- **Test Coverage**: 62 tests passing, 14 e2e tests (manually skipped for production)
-- **Path Portability**: All generated files now use workspace-relative paths for cross-platform compatibility
+- `.lockor` file now uses relative paths instead of absolute paths for git sharing compatibility
+- Fixed empty `inputs.all_branches` causing `fromJson` errors in versioning job
+- Removed duplicative workflow triggers causing multiple test runs
+- Fixed PR number suffix in squash commit message validation
+- Resolved all test failures and improved test coverage
+- Fixed TypeScript compilation errors
+- Restored blue linting warnings for locked files
+- Fixed workflow permissions and duplicate cron schedules
+- Improved file system handling in tests
 
 ## [0.2.0] - 2024-09-05
+
+### Added
+- Configurable branch flow system with environment variables
+- Change detection for optimized workflow execution
 
 ### Fixed
 - Added contents: write permission for tag creation in CI/CD pipeline
@@ -102,12 +65,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Enabled proper release-it version detection
 - Improved deploy script reliability
+- Automatically push git tags to remote
 
 ## [0.1.11] - 2024-09-05
 
 ### Fixed
 - Restructured deploy script to tag only after successful publishing
 - Improved version handling and deployment process
+
+## [0.1.10] - 2024-09-05
+
+### Fixed
+- Improved deploy script pnpm usage
+- Better error handling in deployment
+
+## [0.1.9] - 2024-09-05
+
+### Changed
+- Updated deploy script to use pnpm instead of npm
+
+## [0.1.8] - 2024-09-05
+
+### Added
+- Missing marketplace fields for better VS Code marketplace integration
+- Optimized icon packaging
+
+## [0.1.7] - 2024-09-05
+
+### Fixed
+- Keep unlock icon visible at all times in status bar
+
+## [0.1.6] - 2024-09-05
+
+### Fixed
+- Prevent lock icon from disappearing in status bar
+
+## [0.1.5] - 2024-09-05
+
+### Added
+- Logo and visual assets for better branding
+- Correct dock icon and optimized package
+
+### Changed
+- Updated keyboard shortcuts (Cmd+Shift+L → Cmd+K Cmd+L) to avoid conflicts
+
+### Fixed
+- Updated README with correct keyboard shortcut
 
 ## [0.1.0] - 2024-09-05
 
