@@ -714,8 +714,7 @@ export class LockorManager {
             } else {
                 for (const filePath of this.lockedFiles) {
                     const relativePath = vscode.workspace.asRelativePath(filePath);
-                    yamlContent += `  - path: "${relativePath}"\n`;
-                    yamlContent += `    absolute: "${filePath}"\n`;
+                    yamlContent += `  - "${relativePath}"\n`;
                 }
             }
 

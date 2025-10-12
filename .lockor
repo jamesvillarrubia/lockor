@@ -5,22 +5,20 @@
 
 # Lockor File Protection Status
 version: "1.0"
-generated: "2025-10-07T21:07:16.432Z"
-protection_level: "soft"
+generated: "2025-10-12T00:00:00.000Z"
+protection_level: "ai-aware"
 total_locked_files: 2
 
 # Protected Files
 locked_files:
-  - path: "demo-config.js"
-    absolute: "/Users/james/Sites/published/lockor/demo-config.js"
-  - path: "test-file.txt"
-    absolute: "/Users/james/Sites/published/lockor/test-file.txt"
+  - "demo-config.js"
+  - "test-file.txt"
 
 # Protection Level Explanation
 protection_info:
-  mode: "soft"
-  description: "Gentle warnings - AI discouraged, users can modify with warnings"
-  ai_instructions: "Check with user before modifying these files"
+  mode: "ai-aware"
+  description: "AI blocked, humans can save with warnings"
+  ai_instructions: "STRICTLY PROHIBITED - Do not modify these files"
   user_restrictions: "Warnings only"
   save_blocking: false
   os_readonly: false

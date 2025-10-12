@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing marketplace fields for better VS Code marketplace integration
 - Optimized icon packaging and dock icons
 - Logo and visual assets for better branding
+- Fast-forward merge enforcement to prevent squash commit validation failures
 
 ### Changed
 - Reorganized test structure for better maintainability
@@ -42,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved file system handling in tests
 - Fixed notification spam and save blocking debugging
 - Resolved hard mode conflict resolution for file markers
+- `.lockor` file now uses relative paths instead of absolute paths for git sharing compatibility
 
 ### Technical Improvements
 - Enhanced CI/CD pipeline with better error handling
