@@ -33,6 +33,7 @@ on:
       - 'vitest.config.ts'
       - 'vitest.e2e.config.ts'
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
     paths:
