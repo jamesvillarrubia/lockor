@@ -9,131 +9,161 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Fast-forward merge enforcement GitHub Action to prevent squash commit validation failures
+- GitHub Action workflow file for enforcing fast-forward merges before PR merge
 - Comprehensive test suite with unit, integration, and e2e tests (62 tests passing)
-- Auto-locking of generated files (`.lockor`, `.cursor/rules/lockor.mdc`) to prevent AI modification
-- Enhanced API commands with better formatting and reduced duplication
-- Test pipeline scripts for local and CI testing
-- Separate e2e test configuration to avoid file system conflicts
-- Comprehensive GitHub Actions CI/CD pipeline with automated testing
-- PR squash commit message validation
-- PR title format checking with sticky comments
-- Automated dependency updates with security scanning
+- Test configuration file for e2e tests separate from unit/integration tests
+- Auto-locking functionality for generated files (`.lockor`, `.cursor/rules/lockor.mdc`)
+- Enhanced API commands with better formatting to reduce duplication in output
+- Test pipeline trigger scripts for CI validation
+- Marketing assets (screenshots, promotional materials)
+- GitHub Actions workflow for comprehensive test suite automation
+- PR title format checking with sticky comment feedback
+- PR squash commit message validation workflow
+- Automated dependency update workflows with security scanning
 
 ### Changed
-- Sophisticated workflow triggers: push runs tests/lint only, PR merge runs full pipeline
-- Reorganized test structure for better maintainability  
-- Improved CI workflow organization with category prefixes (job.*, pipe.yml)
-- Enhanced test coverage and reliability
-- Better error handling and conditional job execution in workflows
+- CI/CD workflow triggers: push to branches runs tests/lint only, PR merge runs full pipeline
+- Reorganized test file structure into unit/, integration/, and e2e/ directories
+- Improved CI workflow organization with category-based prefixes (job.*, pipe.yml)
+- Enhanced conditional job execution in GitHub Actions workflows
 
 ### Fixed
-- `.lockor` file now uses relative paths instead of absolute paths for git sharing compatibility
-- Fixed empty `inputs.all_branches` causing `fromJson` errors in versioning job
-- Removed duplicative workflow triggers causing multiple test runs
-- Fixed PR number suffix in squash commit message validation
-- Resolved all test failures and improved test coverage
-- Fixed TypeScript compilation errors
-- Restored blue linting warnings for locked files
-- Fixed workflow permissions and duplicate cron schedules
-- Improved file system handling in tests
+- `.lockor` file format changed from absolute to relative paths for cross-platform compatibility
+- Empty `inputs.all_branches` parameter now defaults to `["main"]` to prevent `fromJson` errors
+- Removed duplicative workflow triggers that caused tests to run multiple times
+- PR squash commit validation now strips `(#PR_NUMBER)` suffix from commit messages
+- All unit and integration test failures resolved
+- TypeScript compilation errors fixed
+- Diagnostic collection properly shows blue linting warnings for locked files
+- E2e tests separated from coverage collection to avoid file system conflicts
+- Duplicate cron schedule removed from dependency update workflow
+- Workflow permissions added for automated dependency updates
 
 ## [0.2.0] - 2024-09-05
 
+> Note: v0.2.0 and v0.1.14 point to the same commit
+
 ### Added
-- Configurable branch flow system with environment variables
-- Change detection for optimized workflow execution
+- GitHub configuration sync script with environment-specific support
+- Comprehensive GitHub Actions pipeline with Open VSX publishing capability
+- Configurable branch flow system with environment variables for CI/CD
+- Change detection workflow to optimize CI/CD execution
+- Security scanning with CodeQL integration
+
+### Changed
+- Reorganized CI workflow files with category prefixes (job.* naming)
+- Implemented positional branch system for flexible CI/CD workflows
+- Optimized GitHub Actions by adopting enhanced workflow patterns
 
 ### Fixed
-- Added contents: write permission for tag creation in CI/CD pipeline
-- Fixed exit code 128 error in tag creation process
-- Improved GitHub Actions workflow permissions
+- Added `contents: write` permission for git tag creation in CI/CD pipeline
+- Fixed exit code 128 error during tag creation process
+- CI/CD versioning issues resolved by aligning package.json with git tags
+- Node.js upgraded to v20 for better compatibility
+- Repository field added to package.json for vsce packaging
+- Workflow permissions configured correctly for main pipeline
+- `workflow_call` triggers added to all reusable workflows
 
 ## [0.1.14] - 2024-09-05
 
 ### Fixed
-- Corrected gallery banner color back to green #277970
-- Reverted previous incorrect color change for better branding consistency
+- Gallery banner color corrected back to green (#277970) for brand consistency
 
 ## [0.1.13] - 2024-09-05
 
+### Changed
+- Gallery banner background color updated to #20272F for visual consistency
+
 ### Fixed
-- Updated gallery banner background color to #20272F
-- Improved visual consistency with dark theme
+- Automatically push git tags to remote after successful publishing
 
 ## [0.1.12] - 2024-09-05
 
 ### Fixed
-- Enabled proper release-it version detection
-- Improved deploy script reliability
-- Automatically push git tags to remote
+- Enabled proper release-it version detection in deploy script
+- Version tag correction from incorrect 0.2.0 back to 0.1.x sequence
 
 ## [0.1.11] - 2024-09-05
 
+### Changed
+- Deploy script restructured to create tags only after successful publishing
+
 ### Fixed
-- Restructured deploy script to tag only after successful publishing
-- Improved version handling and deployment process
+- Improved version handling in deployment process
+- Deploy script npm scripts added for better workflow
 
 ## [0.1.10] - 2024-09-05
 
+> Note: Version 0.1.10 exists in commit history but was not formally tagged
+
 ### Fixed
-- Improved deploy script pnpm usage
-- Better error handling in deployment
+- Improved deploy script pnpm usage and error handling
 
 ## [0.1.9] - 2024-09-05
 
+> Note: Version 0.1.9 exists in commit history but was not formally tagged
+
 ### Changed
-- Updated deploy script to use pnpm instead of npm
+- Deploy script migrated from npm to pnpm
 
 ## [0.1.8] - 2024-09-05
 
+> Note: Version 0.1.8 exists in commit history but was not formally tagged
+
 ### Added
-- Missing marketplace fields for better VS Code marketplace integration
-- Optimized icon packaging
+- Missing marketplace fields for better VS Code marketplace discoverability
+- Optimized icon packaging for faster extension loading
 
 ## [0.1.7] - 2024-09-05
 
+> Note: Version 0.1.7 exists in commit history but was not formally tagged
+
 ### Fixed
-- Keep unlock icon visible at all times in status bar
+- Status bar unlock icon now remains visible at all times
 
 ## [0.1.6] - 2024-09-05
 
+> Note: Version 0.1.6 exists in commit history but was not formally tagged
+
 ### Fixed
-- Prevent lock icon from disappearing in status bar
+- Status bar lock icon no longer disappears unexpectedly
 
 ## [0.1.5] - 2024-09-05
 
+> Note: Version 0.1.5 exists in commit history but was not formally tagged
+
 ### Added
-- Logo and visual assets for better branding
-- Correct dock icon and optimized package
+- Logo and visual brand assets
+- Correct dock icon with optimized packaging
 
 ### Changed
-- Updated keyboard shortcuts (Cmd+Shift+L → Cmd+K Cmd+L) to avoid conflicts
+- Keyboard shortcut changed from Cmd+Shift+L to Cmd+K Cmd+L to avoid conflicts
 
 ### Fixed
-- Updated README with correct keyboard shortcut
+- README updated with correct keyboard shortcut documentation
 
 ## [0.1.0] - 2024-09-05
 
 ### Added
 - Initial release of Lockor VS Code extension
-- File locking and unlocking functionality
-- Three protection levels: Soft, AI-Aware, and Hard
-- Language-aware file markers with appropriate comment syntax
-- `.lockor` YAML status file generation
-- Cursor AI integration with `.cursor/rules/lockor.mdc`
-- Status bar indicator with gold warning background
-- Workspace diagnostics integration
-- Debounced notifications to prevent spam
+- File locking and unlocking functionality with command palette integration
+- Three protection levels: Soft (warnings only), AI-Aware (AI blocked, human warnings), Hard (OS read-only)
+- Language-aware file markers with appropriate comment syntax for different file types
+- `.lockor` YAML status file generation for workspace-level tracking
+- Cursor AI integration with `.cursor/rules/lockor.mdc` rule generation
+- Status bar indicator with gold warning background for locked files
+- VS Code workspace diagnostics integration with linting-style warnings
+- Debounced notifications to prevent spam during rapid file operations
 - Hard mode conflict resolution for file markers
-- Multi-layer AI visibility system
+- Multi-layer AI visibility system (VS Code context, .lockor file, .cursor rules)
 - Comprehensive settings and configuration options
 
 ### Features
-- 🔒 Smart file protection system
-- 🤖 AI integration and blocking capabilities  
-- 📁 Multiple AI visibility layers
-- ⚙️ Advanced configuration options
-- 🎯 Protection levels for different use cases
-- 📊 Status bar and visual indicators
-- 💾 Persistent lock state management
-- 🚫 Save prevention and OS-level read-only (Hard mode)
+- 🔒 Smart file protection system with granular control
+- 🤖 AI integration and blocking capabilities for AI assistants
+- 📁 Multiple AI visibility layers for comprehensive protection
+- ⚙️ Advanced configuration options with per-file customization
+- 🎯 Protection levels for different use cases and team workflows
+- 📊 Status bar and visual indicators for immediate feedback
+- 💾 Persistent lock state management across VS Code sessions
+- 🚫 Save prevention and OS-level read-only enforcement (Hard mode)
